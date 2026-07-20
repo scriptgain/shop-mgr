@@ -8,6 +8,7 @@ use App\Models\ShippingRate;
 use App\Models\ShippingZone;
 use App\Models\User;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -82,6 +83,16 @@ class ShopBootstrap extends Command
             return;
         }
 
+        // Atomic: a zone with no rates quotes nothing, so a half-written setup
+        // is worse than none. The guard above only sees zones, so partial state
+        // would otherwise be skipped on every later run.
+        DB::transaction(function (): void {
+            $this->writeShippingDefaults();
+        });
+    }
+
+    private function writeShippingDefaults(): void
+    {
         $domestic = ShippingZone::create([
             'name' => 'Domestic (United States)',
             'countries' => ['US'],
@@ -106,6 +117,9 @@ class ShopBootstrap extends Command
                 'name' => 'Express (1-2 Business Days)',
                 'type' => 'flat',
                 'price_cents' => 1495,
+                // Every row in a multi-row insert() must carry the same keys:
+                // the query builder takes its column list from the first row.
+                'free_above_cents' => null,
                 'is_active' => true,
                 'position' => 1,
                 'created_at' => now(),
