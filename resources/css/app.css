@@ -1,0 +1,126 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views';
+
+/*
+  ShopMGR design system — "Storefront Violet".
+  Cool slate neutrals + a violet accent. Violet keeps rose/red free for
+  destructive actions, failed payments, and refund states. Tokens are defined
+  once here so the whole product rebrands by editing the --color-brand-* scale.
+*/
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Brand accent (violet). Change these to rebrand. */
+    --color-brand-50: #f5f3ff;
+    --color-brand-100: #ede9fe;
+    --color-brand-200: #ddd6fe;
+    --color-brand-300: #c4b5fd;
+    --color-brand-400: #a78bfa;
+    --color-brand-500: #8b5cf6;
+    --color-brand-600: #7c3aed;
+    --color-brand-700: #6d28d9;
+    --color-brand-800: #5b21b6;
+    --color-brand-900: #4c1d95;
+    --color-brand-950: #2e1065;
+
+    /* Dark chrome (top utility bar on both the admin and the storefront). */
+    --color-chrome: #17132a;
+    --color-chrome-soft: #221b3d;
+
+    /* Storefront surfaces — warmer than the admin's cool slate so the shop
+       reads as a shop, not as an admin panel wearing a different hat. */
+    --color-shop-bg: #fbfaf9;
+    --color-shop-ink: #1c1917;
+    --color-shop-muted: #78716c;
+    --color-shop-line: #e7e5e4;
+}
+
+@layer base {
+    html {
+        -webkit-text-size-adjust: 100%;
+    }
+    body {
+        @apply bg-slate-50 text-slate-800 antialiased;
+    }
+    /* Kill the black focus flash on click; keep keyboard focus rings. */
+    :focus:not(:focus-visible) {
+        outline: none;
+    }
+    :focus-visible {
+        @apply outline-none ring-2 ring-brand-500/60 ring-offset-2 ring-offset-white;
+    }
+    /* Table numerics and money line up. */
+    .tabular {
+        font-variant-numeric: tabular-nums;
+    }
+    /* Hide Alpine-controlled elements until Alpine initializes. */
+    [x-cloak] {
+        display: none !important;
+    }
+}
+
+@layer components {
+    /* A thin, reusable divider between page sections (house style). */
+    .section-divider {
+        @apply border-t border-slate-200;
+    }
+    /* Horizontal nav can scroll without showing a scrollbar. */
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    /* ---- Storefront primitives ------------------------------------------
+       The public shop shares the token layer but not the admin's chrome, so
+       these give it its own quieter, editorial surface treatment. */
+    .shop-body {
+        background: var(--color-shop-bg);
+        color: var(--color-shop-ink);
+    }
+    .shop-hairline {
+        border-color: var(--color-shop-line);
+    }
+    /* Product card media box: fixed square ratio so a grid of mixed-aspect
+       uploads still lines up. */
+    .shop-media {
+        aspect-ratio: 1 / 1;
+        background: #f5f5f4;
+        overflow: hidden;
+    }
+    .shop-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .shop-card:hover .shop-media img {
+        transform: scale(1.04);
+    }
+    /* Variant option pill. */
+    .shop-option {
+        @apply inline-flex items-center justify-center min-w-11 rounded-full border px-3.5 py-2 text-sm font-medium transition cursor-pointer select-none;
+        border-color: var(--color-shop-line);
+        color: var(--color-shop-ink);
+        background: #fff;
+    }
+    .shop-option:hover {
+        border-color: var(--color-brand-400);
+    }
+    .shop-option.is-active {
+        border-color: var(--color-brand-600);
+        background: var(--color-brand-50);
+        color: var(--color-brand-800);
+    }
+    .shop-option.is-disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        text-decoration: line-through;
+    }
+}
