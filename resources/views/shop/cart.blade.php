@@ -26,7 +26,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
 
                 {{-- Line items --}}
-                <div class="lg:col-span-2 divide-y shop-hairline">
+                <div class="min-w-0 lg:col-span-2 divide-y shop-hairline">
                     @foreach ($cart->items as $item)
                         @php $image = $item->product?->primaryImage(); @endphp
                         <div class="py-6 first:pt-0 flex gap-4 sm:gap-6">

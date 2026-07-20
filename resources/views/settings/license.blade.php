@@ -22,7 +22,7 @@
     </x-page-header>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 space-y-6">
+        <div class="min-w-0 lg:col-span-2 space-y-6">
             <x-card title="License Key">
                 <form method="POST" action="{{ route('settings.license.update') }}" class="space-y-4">
                     @csrf

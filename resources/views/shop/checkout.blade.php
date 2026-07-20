@@ -25,7 +25,7 @@
             <input type="hidden" name="shipping_rate_id" x-bind:value="selectedRateId ?? ''">
             <input type="hidden" name="billing_same" x-bind:value="billingSame ? 1 : 0">
 
-            <div class="lg:col-span-2 space-y-10">
+            <div class="min-w-0 lg:col-span-2 space-y-10">
 
                 {{-- Contact --}}
                 <div>
@@ -148,7 +148,16 @@
                             <label class="flex items-start gap-3 rounded-lg ring-1 ring-inset shop-hairline px-4 py-3 cursor-pointer has-[:checked]:ring-brand-600 has-[:checked]:bg-brand-50 transition">
                                 <input type="radio" name="payment_gateway" value="{{ $slug }}" @checked(old('payment_gateway', array_key_first($gateways)) === $slug) required class="mt-0.5 text-brand-600 focus:ring-brand-500">
                                 <span>
-                                    <span class="block text-sm font-medium text-shop-ink">{{ $gateway['label'] }}</span>
+                                    <span class="flex items-center gap-2 text-sm font-medium text-shop-ink">
+                                        {{ $gateway['label'] }}
+                                        @if ($gateway['test_mode'])
+                                            {{-- The shopper must be able to tell a store that is not really charging. --}}
+                                            <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800 ring-1 ring-inset ring-amber-200">
+                                                <x-icon name="warning" class="w-3 h-3 shrink-0" />
+                                                Test Mode
+                                            </span>
+                                        @endif
+                                    </span>
                                     <span class="block text-xs text-shop-muted">{{ $gateway['description'] }}</span>
                                 </span>
                             </label>

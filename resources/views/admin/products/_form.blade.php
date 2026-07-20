@@ -209,18 +209,8 @@
         </div>
 
         {{-- SEO --}}
-        <div x-show="tab === 'seo'" x-cloak>
-            <x-card title="Search Engine Listing" subtitle="How this product appears in search results and link previews.">
-                <div class="space-y-5">
-                    <x-field label="SEO Title" for="seo_title" hint="Leave blank to use the product name." :error="$errors->first('seo_title')">
-                        <x-input id="seo_title" name="seo_title" :value="old('seo_title', $product->seo_title)" maxlength="255" />
-                    </x-field>
-                    <x-field label="SEO Description" for="seo_description" hint="Leave blank to use the excerpt." :error="$errors->first('seo_description')">
-                        <textarea id="seo_description" name="seo_description" rows="3" maxlength="500"
-                            class="block w-full rounded-lg border-0 bg-white px-3 py-2 text-sm text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-brand-500">{{ old('seo_description', $product->seo_description) }}</textarea>
-                    </x-field>
-                </div>
-            </x-card>
+        <div x-show="tab === 'seo'" x-cloak class="space-y-6">
+            <x-seo-panel :entity="$product" />
         </div>
 
         {{-- Save bar. Sticks to the bottom so it is reachable from any tab

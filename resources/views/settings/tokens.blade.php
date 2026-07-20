@@ -16,7 +16,7 @@
     @endif
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2">
+        <div class="min-w-0 lg:col-span-2">
             <x-card title="Your Tokens" :flush="$tokens->isNotEmpty()">
                 @if ($tokens->isEmpty())
                     <x-empty-state icon="key" title="No Tokens Yet" description="Create a token to use the Manager API." />

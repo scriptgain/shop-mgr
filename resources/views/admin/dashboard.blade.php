@@ -15,7 +15,7 @@
          and the rest become a hairline-divided strip underneath it. --}}
     <section class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200" aria-labelledby="revenue-heading">
         <div class="grid gap-6 p-5 sm:p-6 lg:grid-cols-5 lg:items-center lg:gap-8">
-            <div class="lg:col-span-2">
+            <div class="min-w-0 lg:col-span-2">
                 <h2 id="revenue-heading" class="vx-eyebrow">Revenue, Last 30 Days</h2>
                 <div class="mt-2.5 flex flex-wrap items-baseline gap-3">
                     <x-money :cents="$revenueMonthCents" size="display" class="text-slate-900" />
@@ -30,7 +30,7 @@
             </div>
 
             {{-- Sparkline. Registered by public/js/shop-admin.js. --}}
-            <div class="lg:col-span-3" x-data="dashboardSparkline(@js($salesSeries))" x-init="init()">
+            <div class="min-w-0 lg:col-span-3" x-data="dashboardSparkline(@js($salesSeries))" x-init="init()">
                 <svg viewBox="0 0 640 160" preserveAspectRatio="none" class="h-20 w-full sm:h-24" role="img" aria-label="Daily net revenue over the last 30 days">
                     <polygon :points="areaPoints" class="fill-brand-500/10"></polygon>
                     <polyline :points="linePoints" fill="none" class="stroke-brand-500" stroke-width="2" vector-effect="non-scaling-stroke"></polyline>
@@ -135,7 +135,7 @@
                         </x-slot:action>
                     </x-empty-state>
                 @else
-                    <x-table flush min-width="min-w-[40rem]">
+                    <x-table flush>
                         <thead>
                             <tr>
                                 <th>Order</th><th>Customer</th><th>Payment</th><th>Fulfillment</th><th class="text-right">Total</th>
@@ -167,7 +167,7 @@
                     <x-empty-state icon="star" title="No Sales To Rank Yet"
                         description="Once orders start arriving, this ranks products by units sold over the last 30 days, so you can see what is carrying the store and what is not moving." />
                 @else
-                    <x-table flush min-width="min-w-[32rem]">
+                    <x-table flush>
                         <thead>
                             <tr>
                                 <th>Product</th><th class="text-right">Units Sold</th><th class="text-right">Revenue</th>
@@ -200,7 +200,7 @@
                     <x-empty-state icon="box" title="Stock Levels Look Healthy"
                         description="A variant shows up here once it drops to {{ config('shop.low_stock_threshold', 5) }} or fewer in stock. Only variants with inventory tracking switched on are counted." />
                 @else
-                    <x-table flush min-width="min-w-[32rem]">
+                    <x-table flush>
                         <thead>
                             <tr>
                                 <th>Product</th><th>SKU</th><th class="text-right">In Stock</th>
@@ -234,7 +234,7 @@
                     <x-empty-state icon="users" title="No Customers Yet"
                         description="Anyone who checks out gets a customer record here, whether they registered an account or checked out as a guest." />
                 @else
-                    <x-table flush min-width="min-w-[32rem]">
+                    <x-table flush>
                         <thead>
                             <tr>
                                 <th>Customer</th><th>Email</th><th class="text-right">Joined</th>

@@ -16,6 +16,13 @@ class AppServiceProvider extends ServiceProvider
         // One cart per request: the storefront layout, the cart page, and the
         // checkout controller must all see the same instance.
         $this->app->singleton(CartService::class);
+
+        // The SEO resolver carries per-request state (the controller describes
+        // the page, the layout later asks for the result), so it must be the
+        // same instance on both sides of a request.
+        $this->app->singleton(\App\Services\SeoService::class);
+        $this->app->singleton(\App\Services\SeoUrlService::class);
+        $this->app->singleton(\App\Services\StructuredDataService::class);
     }
 
     public function boot(): void
@@ -101,6 +108,24 @@ class AppServiceProvider extends ServiceProvider
                 'shop.time_format' => $s['time_format'] ?? 'g:i A',
             ]);
 
+            // SEO. Same rule as the rest: config/seo.php holds defaults only,
+            // Settings -> SEO is the source of truth.
+            config([
+                'seo.site_noindex' => ($s['seo_site_noindex'] ?? '0') === '1',
+                'seo.title_template' => $s['seo_title_template'] ?? config('seo.title_template'),
+                'seo.default_description' => $s['seo_default_description'] ?? null,
+                'seo.default_og_image' => $s['seo_default_og_image'] ?? null,
+                'seo.twitter_card' => $s['seo_twitter_card'] ?? config('seo.twitter_card'),
+                'seo.twitter_site' => $s['seo_twitter_site'] ?? null,
+                'seo.organization_name' => $s['seo_organization_name'] ?? null,
+                'seo.organization_logo' => $s['seo_organization_logo'] ?? null,
+                'seo.organization_sameas' => $s['seo_organization_sameas'] ?? null,
+                'seo.item_condition' => $s['seo_item_condition'] ?? config('seo.item_condition'),
+                'seo.sitemap_include_out_of_stock' => ($s['seo_sitemap_include_out_of_stock'] ?? '1') === '1',
+                'seo.google_verification' => $s['seo_google_verification'] ?? null,
+                'seo.bing_verification' => $s['seo_bing_verification'] ?? null,
+            ]);
+
             // Payment gateway credentials — DB only, never .env.
             config([
                 'services.stripe.key' => $s['stripe_publishable_key'] ?? null,
@@ -141,6 +166,7 @@ class AppServiceProvider extends ServiceProvider
                 'storeName' => config('shop.store_name'),
                 'currentCustomer' => null,
                 'maxWidth' => config('shop.max_width', 'max-w-6xl'),
+                'themeLogo' => null,
             ];
 
             try {
@@ -162,6 +188,9 @@ class AppServiceProvider extends ServiceProvider
                     'storeName' => config('shop.store_name'),
                     'currentCustomer' => auth('customer')->user(),
                     'maxWidth' => config('shop.max_width', 'max-w-6xl'),
+                    // The active theme may replace the wordmark with an
+                    // uploaded logo. Resolved here, not in the layout.
+                    'themeLogo' => app(\App\Services\ThemeService::class)->active()?->logoUrl(),
                 ]);
             } catch (\Throwable $e) {
                 $view->with($defaults);

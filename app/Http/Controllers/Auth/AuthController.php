@@ -12,8 +12,54 @@ class AuthController extends Controller
 {
     public function show(Request $request)
     {
-        return view('auth.login');
+        return view('auth.login', [
+            'devLoginUser' => self::devLoginUser($request),
+        ]);
     }
+
+    /**
+     * One-click developer sign-in, restricted to an allowlisted IP.
+     *
+     * Both the button and the endpoint use this same check, so the route is not
+     * merely hidden: a POST from any other address 404s. Inert unless BOTH
+     * dev_login_ip and dev_login_email are set in Settings, so it can be
+     * switched off from the admin without a deploy.
+     *
+     * This only resolves to a real client IP because trustProxies now includes
+     * the Cloudflare ranges. Under the old loopback-only list every request
+     * looked like a Cloudflare edge address and this would match nobody.
+     */
+    public static function devLoginUser(Request $request): ?\App\Models\User
+    {
+        $allowed = trim((string) \App\Models\Setting::get('dev_login_ip', ''));
+        $email = trim((string) \App\Models\Setting::get('dev_login_email', ''));
+
+        if ($allowed === '' || $email === '') {
+            return null;
+        }
+
+        $ips = array_filter(array_map('trim', explode(',', $allowed)));
+
+        if (! in_array((string) $request->ip(), $ips, true)) {
+            return null;
+        }
+
+        return \App\Models\User::where('email', $email)->first();
+    }
+
+    public function devLogin(Request $request)
+    {
+        $user = self::devLoginUser($request);
+
+        abort_if($user === null, 404);
+
+        Auth::login($user);
+        $request->session()->regenerate();
+        \App\Models\AuditLog::record('login', 'Signed in via developer quick login from '.$request->ip());
+
+        return redirect()->intended(route('dashboard'));
+    }
+
 
     public function login(Request $request)
     {

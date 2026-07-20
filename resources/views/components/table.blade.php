@@ -1,19 +1,23 @@
-@props(['flush' => false, 'minWidth' => 'min-w-[46rem]'])
+@props(['flush' => false, 'minWidth' => ''])
 {{-- Styled table. Consumers write plain <thead>/<tbody>/<th>/<td>; cell styling
      is applied automatically.
 
-     Sizing: columns take their natural width and the table scrolls inside its
-     own container once it stops fitting. The previous approach forced
-     table-layout:fixed and ellipsised every cell, which gave a product name and
-     a SKU an identical share of the row and cut both. Natural widths plus a
-     contained scroll keeps the page free of horizontal scroll while letting the
-     data stay legible.
+     Sizing: the table must FIT, not scroll. No min-width floor, and the prose
+     column wraps so a long product name reflows instead of widening the row.
+     Numeric, date and action cells stay on one line because a wrapped price is
+     harder to read than a narrow one. The overflow container remains only as a
+     last resort for genuinely wide tables; in normal use it never engages.
 
      Rows opt into the exception rail with class="vx-rail vx-rail-warn". --}}
 @once
     <style>
         .vx-table{width:100%;border-collapse:separate;border-spacing:0;}
         .vx-table th,.vx-table td{white-space:nowrap;}
+        /* The first column carries the name/description on nearly every table
+           here, so it wraps by default. Without this the row cannot shrink and
+           the region scrolls sideways. */
+        .vx-table th:first-child,.vx-table td:first-child{white-space:normal;}
+        .vx-table th.vx-nowrap,.vx-table td.vx-nowrap{white-space:nowrap;}
         /* Prose cells may wrap; number and control cells stay on one line. */
         .vx-table .vx-wrap{white-space:normal;}
         /* Selection and action columns hug their controls instead of taking an

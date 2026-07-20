@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Order;
 use App\Services\CheckoutService;
+use App\Services\OrderMailer;
+use App\Services\Payments\OrderPayments;
 use App\Support\Money;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -195,37 +198,98 @@ class OrderController extends Controller
         return back()->with('status', 'Order marked as paid.');
     }
 
+    /**
+     * Refund an order, full or partial.
+     *
+     * A card order is refunded THROUGH STRIPE: the money actually goes back. A
+     * manual/offline order is recorded only, because the merchant moved that
+     * money themselves and we have no rail to reverse it on.
+     *
+     * The amount is re-bounded inside OrderPayments::refund against the order's
+     * own refundable balance, so a tampered form field cannot refund more than
+     * was charged even though it is validated here too.
+     */
     public function refund(Request $request, Order $order)
     {
         $data = $request->validate([
-            'amount' => ['required', 'string'],
-            'reason' => ['nullable', 'string', 'max:255'],
+            // 'full' is a distinct mode rather than the merchant retyping the
+            // total, so a full refund can never be a cent short of full.
+            'mode' => ['required', Rule::in(['full', 'partial'])],
+            'amount' => ['required_if:mode,partial', 'nullable', 'string'],
+            'reason' => ['nullable', Rule::in(['duplicate', 'fraudulent', 'requested_by_customer', ''])],
+            'note' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $amount = Money::parse($data['amount']) ?? 0;
-        $remaining = $order->total_cents - $order->refunded_cents;
+        $remaining = $order->refundable_cents;
 
-        if ($amount <= 0 || $amount > $remaining) {
-            return back()->withErrors([
-                'amount' => 'Enter an amount between '.Money::format(1).' and '.Money::format($remaining).'.',
-            ]);
+        // withErrors AND a session warning: the admin layout renders session
+        // alerts but not the error bag, and the error bag alone would only
+        // surface inside the refund modal, which is closed. A refund that
+        // failed must never look like nothing happened.
+        if ($remaining < 1) {
+            return $this->refundFailed('There is nothing left to refund on this order.');
         }
 
-        $refunded = $order->refunded_cents + $amount;
+        if ($data['mode'] === 'full') {
+            $amount = null; // Let the service use the full refundable balance.
+        } else {
+            $amount = Money::parse($data['amount']) ?? 0;
 
-        $order->forceFill([
-            'refunded_cents' => $refunded,
-            'financial_status' => $refunded >= $order->total_cents ? 'refunded' : 'partially_refunded',
-        ])->save();
+            if ($amount <= 0 || $amount > $remaining) {
+                return $this->refundFailed(
+                    'Enter an amount between '.Money::format(1).' and '.Money::format($remaining).'.'
+                );
+            }
+        }
 
-        $order->recordEvent('refunded', 'Refunded '.Money::format($amount), [
-            'amount' => $amount,
-            'reason' => $data['reason'] ?? null,
-        ]);
+        $result = OrderPayments::refund(
+            $order,
+            $amount,
+            // validate() only returns keys that were actually present, so an
+            // omitted reason is a missing key, not an empty string.
+            ($data['reason'] ?? null) ?: null,
+            $request->user()
+        );
 
-        $order->customer?->refreshTotals();
+        if (! $result['ok']) {
+            return $this->refundFailed($result['error']);
+        }
 
-        return back()->with('status', 'Refund recorded.');
+        // Money leaving the business is an audited action, always.
+        AuditLog::record(
+            'refunded',
+            'Refunded '.Money::format($result['amount_cents']).' on order '.$order->number
+                .($order->has_card_payment ? ' via Stripe' : ' (recorded only)'),
+            $order->fresh()
+        );
+
+        return back()->with('status', 'Refunded '.Money::format($result['amount_cents']).'.');
+    }
+
+    /** Surface a refund failure both ways, so it is visible on the page. */
+    private function refundFailed(string $message)
+    {
+        return back()
+            ->with('warning', $message)
+            ->withErrors(['amount' => $message]);
+    }
+
+    /** Re-send the customer's confirmation email on request. */
+    public function resendEmail(Order $order)
+    {
+        $sent = OrderMailer::resend($order);
+
+        if (! $sent) {
+            return back()
+                ->with('warning', 'Could not send that email. Check the SMTP settings.')
+                ->withErrors(['email' => 'Could not send that email. Check the SMTP settings.']);
+        }
+
+        $order->recordEvent('email', 'Confirmation Email Resent', ['to' => $order->email]);
+
+        AuditLog::record('emailed', 'Resent confirmation for order '.$order->number, $order);
+
+        return back()->with('status', 'Confirmation email resent.');
     }
 
     public function cancel(Request $request, Order $order)

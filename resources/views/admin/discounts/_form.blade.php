@@ -5,7 +5,7 @@
     @if ($isEdit) @method('PUT') @endif
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 space-y-6">
+        <div class="min-w-0 lg:col-span-2 space-y-6">
             <x-card title="Discount">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <x-field label="Code" for="code" required hint="Shoppers type this at checkout." :error="$errors->first('code')">

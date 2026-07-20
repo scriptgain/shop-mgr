@@ -11,7 +11,7 @@
         @method('PUT')
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2">
+            <div class="min-w-0 lg:col-span-2">
                 <x-card title="Identity">
                     <div class="space-y-5">
                         <x-field label="Product Name" for="brand_name" required :error="$errors->first('brand_name')">

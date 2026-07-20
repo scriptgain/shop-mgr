@@ -8,6 +8,7 @@
         ['Store', [
             ['Storefront', 'bag', 'settings.storefront.edit', 'settings.storefront.*'],
             ['Payments', 'credit-card', 'settings.payments.edit', 'settings.payments.*'],
+            ['SEO', 'globe', 'settings.seo.edit', 'settings.seo.*'],
         ]],
         ['Preferences', [
             ['General', 'settings', 'settings.general.edit', 'settings.general.*'],

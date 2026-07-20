@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ShippingController;
 use App\Http\Controllers\Admin\StorefrontSettingsController;
 use App\Http\Controllers\Admin\TaxController;
+use App\Http\Controllers\Admin\TemplateController;
+use App\Http\Controllers\Admin\ThemeController;
 use App\Http\Controllers\ApiTokenController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\Auth\AuthController;
@@ -25,6 +27,10 @@ use App\Http\Controllers\Shop\AccountController;
 use App\Http\Controllers\Shop\CartController;
 use App\Http\Controllers\Shop\CatalogController;
 use App\Http\Controllers\Shop\CheckoutController;
+use App\Http\Controllers\Shop\PaymentController;
+use Illuminate\Routing\Middleware\ValidateSignature;
+use App\Http\Controllers\Shop\RobotsController;
+use App\Http\Controllers\Shop\SitemapController;
 use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -52,6 +58,9 @@ Route::prefix('setup')->group(function () {
 Route::middleware('guest')->group(function () {
     Route::get('/admin/login', [AuthController::class, 'show'])->name('login');
     Route::post('/admin/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
+    // Developer quick login. The action 404s unless the request IP matches
+    // the dev_login_ip setting, so this route is gated, not just hidden.
+    Route::post('/admin/dev-login', [AuthController::class, 'devLogin'])->name('dev-login')->middleware('throttle:10,1');
 });
 Route::get('/magic/{user}', [AuthController::class, 'magic'])->name('magic-login')->middleware('signed');
 Route::get('/2fa', [AuthController::class, 'challenge'])->name('2fa.challenge');
@@ -64,6 +73,22 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->n
 Route::get('/brand/favicon', [FaviconController::class, 'svg'])->name('favicon.svg');
 Route::get('/brand/favicon-png', [FaviconController::class, 'faviconPng'])->name('favicon.png');
 Route::get('/brand/favicon-apple', [FaviconController::class, 'appleIcon'])->name('favicon.apple');
+
+/*
+|--------------------------------------------------------------------------
+| SEO endpoints (public, unauthenticated)
+|--------------------------------------------------------------------------
+| robots.txt is dynamic so the staging noindex switch and the sitemap URL come
+| from DB settings. public/robots.txt must NOT exist, or nginx serves the
+| static file and never reaches PHP.
+*/
+Route::get('/robots.txt', RobotsController::class)->name('robots');
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
+Route::get('/sitemap-pages.xml', [SitemapController::class, 'pages'])->name('sitemap.pages');
+Route::get('/sitemap-products-{page}.xml', [SitemapController::class, 'products'])
+    ->whereNumber('page')->name('sitemap.products');
+Route::get('/sitemap-collections-{page}.xml', [SitemapController::class, 'collections'])
+    ->whereNumber('page')->name('sitemap.collections');
 
 /*
 |--------------------------------------------------------------------------
@@ -90,6 +115,29 @@ Route::name('shop.')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout');
     Route::post('/checkout/quote', [CheckoutController::class, 'quote'])->name('checkout.quote');
     Route::post('/checkout', [CheckoutController::class, 'place'])->middleware('throttle:20,1')->name('checkout.place');
+    /*
+     * Card step. Signed so a guest returns to their OWN payment page after a
+     * 3D Secure bounce without needing an account, while the order number in
+     * the path stays un-walkable by anyone who did not receive the link.
+     */
+    Route::get('/checkout/{order:number}/payment', [PaymentController::class, 'show'])
+        ->middleware('signed')->name('checkout.payment');
+
+    /*
+     * Stripe's return_url.
+     *
+     * ValidateSignature::except() is load-bearing: Stripe appends
+     * payment_intent, payment_intent_client_secret and redirect_status to the
+     * URL it redirects to, and a plain 'signed' middleware hashes the full query
+     * string, so every real return would 403. Those three parameters are
+     * excluded from the signature and are NOT read by the controller either: the
+     * outcome is re-fetched from the Stripe API, so appending
+     * redirect_status=succeeded by hand achieves nothing.
+     */
+    Route::get('/checkout/{order:number}/return', [PaymentController::class, 'return'])
+        ->middleware(ValidateSignature::absolute(['payment_intent', 'payment_intent_client_secret', 'redirect_status']))
+        ->name('checkout.return');
+
     // Signed so a guest reaches their confirmation without an account, but the
     // URL cannot be walked to read someone else's order.
     Route::get('/orders/{order:number}/confirmation', [CheckoutController::class, 'confirmation'])
@@ -139,6 +187,9 @@ Route::prefix('admin')->middleware(['auth', 'security.policy'])->group(function 
     Route::delete('collections/bulk', [CollectionController::class, 'bulkDestroy'])->name('collections.bulk-destroy');
     Route::resource('collections', CollectionController::class);
 
+    /* ---- SEO health (catalog-level, not a settings screen) ---- */
+    Route::get('seo', [\App\Http\Controllers\Admin\SeoHealthController::class, 'index'])->name('seo.index');
+
     /* ---- Orders ---- */
     Route::delete('orders/bulk', [OrderController::class, 'bulkDestroy'])->name('orders.bulk-destroy');
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
@@ -146,6 +197,7 @@ Route::prefix('admin')->middleware(['auth', 'security.policy'])->group(function 
     Route::post('orders/{order}/fulfill', [OrderController::class, 'fulfill'])->name('orders.fulfill');
     Route::post('orders/{order}/pay', [OrderController::class, 'markPaid'])->name('orders.pay');
     Route::post('orders/{order}/refund', [OrderController::class, 'refund'])->name('orders.refund');
+    Route::post('orders/{order}/resend-email', [OrderController::class, 'resendEmail'])->name('orders.resend-email');
     Route::post('orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::post('orders/{order}/note', [OrderController::class, 'note'])->name('orders.note');
 
@@ -173,12 +225,44 @@ Route::prefix('admin')->middleware(['auth', 'security.policy'])->group(function 
     Route::delete('taxes/bulk', [TaxController::class, 'bulkDestroy'])->name('taxes.bulk-destroy');
     Route::resource('taxes', TaxController::class)->parameters(['taxes' => 'taxRule']);
 
+    /* ---- Appearance: themes + templates -------------------------------
+    | Themes restyle the storefront from stored design tokens; templates let
+    | an admin edit the real Blade behind any page. Bulk and preview routes are
+    | declared before the {theme} / {view} routes so they are not swallowed by
+    | the parameter segment.
+    */
+    Route::get('appearance/themes', [ThemeController::class, 'index'])->name('themes.index');
+    Route::get('appearance/themes/create', [ThemeController::class, 'create'])->name('themes.create');
+    Route::post('appearance/themes', [ThemeController::class, 'store'])->name('themes.store');
+    Route::post('appearance/themes/import', [ThemeController::class, 'import'])->name('themes.import');
+    Route::delete('appearance/themes/bulk', [ThemeController::class, 'bulkDestroy'])->name('themes.bulk-destroy');
+    Route::post('appearance/themes/preview/stop', [ThemeController::class, 'stopPreview'])->name('themes.preview.stop');
+    Route::get('appearance/themes/{theme}/edit', [ThemeController::class, 'edit'])->name('themes.edit');
+    Route::put('appearance/themes/{theme}', [ThemeController::class, 'update'])->name('themes.update');
+    Route::delete('appearance/themes/{theme}', [ThemeController::class, 'destroy'])->name('themes.destroy');
+    Route::post('appearance/themes/{theme}/activate', [ThemeController::class, 'activate'])->name('themes.activate');
+    Route::post('appearance/themes/{theme}/preview', [ThemeController::class, 'preview'])->name('themes.preview');
+    Route::post('appearance/themes/{theme}/duplicate', [ThemeController::class, 'duplicate'])->name('themes.duplicate');
+    Route::get('appearance/themes/{theme}/export', [ThemeController::class, 'export'])->name('themes.export');
+
+    Route::get('appearance/templates', [TemplateController::class, 'index'])->name('templates.index');
+    Route::post('appearance/templates/preview/stop', [TemplateController::class, 'stopPreview'])->name('templates.preview.stop');
+    Route::get('appearance/templates/{view}', [TemplateController::class, 'edit'])->name('templates.edit')->where('view', '[A-Za-z0-9._-]+');
+    Route::put('appearance/templates/{view}', [TemplateController::class, 'update'])->name('templates.update')->where('view', '[A-Za-z0-9._-]+');
+    Route::delete('appearance/templates/{view}', [TemplateController::class, 'reset'])->name('templates.reset')->where('view', '[A-Za-z0-9._-]+');
+    Route::post('appearance/templates/{view}/preview', [TemplateController::class, 'preview'])->name('templates.preview')->where('view', '[A-Za-z0-9._-]+');
+    Route::get('appearance/templates/{view}/versions/{version}', [TemplateController::class, 'version'])->name('templates.version')->where('view', '[A-Za-z0-9._-]+');
+    Route::post('appearance/templates/{view}/versions/{version}/revert', [TemplateController::class, 'revert'])->name('templates.revert')->where('view', '[A-Za-z0-9._-]+');
+
     /* ---- Settings: store-specific ---- */
     Route::view('/settings', 'settings.index')->name('settings.index');
     Route::get('settings/storefront', [StorefrontSettingsController::class, 'edit'])->name('settings.storefront.edit');
     Route::put('settings/storefront', [StorefrontSettingsController::class, 'update'])->name('settings.storefront.update');
     Route::get('settings/payments', [PaymentSettingsController::class, 'edit'])->name('settings.payments.edit');
     Route::put('settings/payments', [PaymentSettingsController::class, 'update'])->name('settings.payments.update');
+    Route::post('settings/payments/test', [PaymentSettingsController::class, 'test'])->name('settings.payments.test');
+    Route::get('settings/seo', [\App\Http\Controllers\Admin\SeoSettingsController::class, 'edit'])->name('settings.seo.edit');
+    Route::put('settings/seo', [\App\Http\Controllers\Admin\SeoSettingsController::class, 'update'])->name('settings.seo.update');
 
     /* ---- Settings: inherited -MGR scaffold ---- */
     Route::get('settings/tokens', [ApiTokenController::class, 'index'])->name('settings.tokens.index');

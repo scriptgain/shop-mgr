@@ -121,14 +121,43 @@ class CheckoutController extends Controller
             'accepts_marketing' => $request->boolean('accepts_marketing'),
         ]);
 
-        // A manual/offline gateway has nothing to charge — the merchant marks
-        // it paid when the transfer lands. A card gateway would redirect to its
-        // hosted page here instead.
+        /*
+         * A card order goes to the payment step. The order exists and is
+         * pending; no money has moved yet, and the amount that will be charged
+         * is the one PricingService just wrote to the order, not anything the
+         * browser posted.
+         *
+         * Note the cart was marked converted inside place(), so a double
+         * submitted checkout form finds an empty cart on its second pass and is
+         * bounced above rather than minting a second order. That is the first of
+         * the two double-charge guards; the order's Stripe idempotency key is
+         * the second.
+         */
+        if ($order->payment_gateway === 'stripe') {
+            return redirect($this->paymentUrl($order));
+        }
+
+        // A manual/offline gateway has nothing to charge: the merchant marks it
+        // paid when the transfer lands. The customer still gets their
+        // confirmation and their payment instructions now.
+        \App\Services\OrderMailer::sendForPlacedOrder($order);
+
         return redirect($this->confirmationUrl($order));
     }
 
     public function confirmation(Order $order)
     {
+        /*
+         * Reconcile on arrival. A shopper can land here while their intent is
+         * still processing (slow 3DS, a bank redirect) and before the webhook
+         * has been delivered. One authoritative read from Stripe means the page
+         * shows the true state rather than a stale "pending" that only corrects
+         * itself on a manual refresh minutes later.
+         */
+        if ($order->has_card_payment && ! $order->is_paid && $order->financial_status === 'pending') {
+            $order = \App\Services\Payments\OrderPayments::syncFromStripe($order);
+        }
+
         $order->load('items');
 
         return view('shop.confirmation', [
@@ -136,7 +165,20 @@ class CheckoutController extends Controller
             'instructions' => $order->payment_gateway === 'manual'
                 ? \App\Models\Setting::get('manual_instructions')
                 : null,
+            // Drives the "we are still confirming your payment" state.
+            'awaitingPayment' => $order->has_card_payment && ! $order->is_paid && $order->financial_status === 'pending',
+            'isTestPayment' => $order->is_test_payment,
         ]);
+    }
+
+    /** Signed link to the card step. Guests reach it without an account. */
+    private function paymentUrl(Order $order): string
+    {
+        return URL::temporarySignedRoute(
+            'shop.checkout.payment',
+            now()->addDay(),
+            ['order' => $order->number]
+        );
     }
 
     /**
@@ -163,13 +205,23 @@ class CheckoutController extends Controller
             $gateways['manual'] = [
                 'label' => 'Manual / Offline Payment',
                 'description' => $settings['manual_instructions'] ?? 'Pay by bank transfer. We will email instructions.',
+                'test_mode' => false,
             ];
         }
 
-        if (($settings['stripe_enabled'] ?? '0') === '1' && ! empty($settings['stripe_secret_key'])) {
+        /*
+         * PaymentSettings::isEnabled() re-checks the switch AND the credentials
+         * on every request. A merchant who clears a key later must see the card
+         * option disappear from checkout, rather than have it stay on the page
+         * and fail in front of a shopper holding their wallet.
+         */
+        if (\App\Services\Payments\PaymentSettings::isEnabled()) {
             $gateways['stripe'] = [
                 'label' => 'Credit Card',
-                'description' => 'Paid securely by card.',
+                'description' => \App\Services\Payments\PaymentSettings::isTestMode()
+                    ? 'Test mode. No real payment will be taken.'
+                    : 'Paid securely by card. We never see your card details.',
+                'test_mode' => \App\Services\Payments\PaymentSettings::isTestMode(),
             ];
         }
 
@@ -177,6 +229,7 @@ class CheckoutController extends Controller
         return $gateways ?: ['manual' => [
             'label' => 'Manual / Offline Payment',
             'description' => 'Pay by bank transfer. We will email instructions.',
+            'test_mode' => false,
         ]];
     }
 }

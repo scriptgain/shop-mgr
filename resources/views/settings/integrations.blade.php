@@ -39,7 +39,7 @@
 
         <x-card title="Telegram" subtitle="Message a Telegram chat via a bot.">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div class="sm:col-span-2">
+                <div class="min-w-0 sm:col-span-2">
                     <x-toggle name="integrations_telegram_enabled" :checked="$en('integrations_telegram_enabled')" label="Enable Telegram" description="Send alerts through a Telegram bot to a chat." />
                 </div>
                 <x-field label="Bot Token" for="integrations_telegram_token" hint="Leave blank to keep the stored value.">
@@ -48,7 +48,7 @@
                 <x-field label="Chat ID" for="integrations_telegram_chat_id" :error="$errors->first('integrations_telegram_chat_id')">
                     <x-input id="integrations_telegram_chat_id" name="integrations_telegram_chat_id" :value="$g('integrations_telegram_chat_id')" placeholder="-1001234567890" />
                 </x-field>
-                <div class="sm:col-span-2"><x-button type="button" variant="secondary" size="sm" icon="bolt" x-on:click="window.sendIntegrationTest('telegram')">Send Test</x-button></div>
+                <div class="min-w-0 sm:col-span-2"><x-button type="button" variant="secondary" size="sm" icon="bolt" x-on:click="window.sendIntegrationTest('telegram')">Send Test</x-button></div>
             </div>
         </x-card>
 

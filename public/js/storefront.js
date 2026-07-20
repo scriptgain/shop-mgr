@@ -154,4 +154,164 @@ document.addEventListener('alpine:init', () => {
                 });
         },
     }));
+
+    /**
+     * Stripe Payment Element.
+     *
+     * Registered here, in the SAME file that already registers variantPicker and
+     * checkoutForm, precisely because this file is loaded BEFORE the Alpine CDN
+     * in the shop layout. Alpine fires alpine:init the moment it starts; a
+     * separate JS file added after the Alpine tag would register nothing and the
+     * card form would silently render empty. Do not move this into its own file
+     * without moving its <script> tag above the Alpine one too.
+     *
+     * Nothing about the amount lives here. The client secret was minted server
+     * side against the order's stored total, so this component cannot influence
+     * what is charged even if the page is tampered with in the browser.
+     */
+    Alpine.data('stripePayment', (config) => ({
+        stripe: null,
+        elements: null,
+        ready: false,
+        processing: false,
+        error: config.initialError || null,
+
+        async init() {
+            if (!config.publishableKey || !config.clientSecret) {
+                this.error = this.error || 'Card payments are unavailable right now.';
+                return;
+            }
+
+            try {
+                const Stripe = await loadStripeJs();
+                this.stripe = Stripe(config.publishableKey);
+
+                // Match the storefront rather than shipping Stripe's default
+                // blue: the brand accent is passed in from the server.
+                this.elements = this.stripe.elements({
+                    clientSecret: config.clientSecret,
+                    appearance: {
+                        theme: 'stripe',
+                        variables: {
+                            colorPrimary: config.accent || '#e11d48',
+                            colorDanger: '#e11d48',
+                            borderRadius: '8px',
+                            fontFamily: 'ui-sans-serif, system-ui, sans-serif',
+                        },
+                    },
+                });
+
+                const payment = this.elements.create('payment', {
+                    layout: 'tabs',
+                    // Billing details are already collected by checkout; asking
+                    // again inside the card widget is duplicate data entry.
+                    fields: { billingDetails: { address: 'auto' } },
+                });
+
+                payment.mount(this.$refs.paymentElement);
+                payment.on('ready', () => { this.ready = true; });
+                payment.on('loaderror', () => {
+                    this.error = 'The card form could not be loaded. Please refresh and try again.';
+                });
+            } catch (e) {
+                this.error = 'The card form could not be loaded. Please refresh and try again.';
+            }
+        },
+
+        async pay() {
+            // Client-side double-submit guard. It is a courtesy, not a control:
+            // the real guard is the order's Stripe idempotency key server side.
+            if (this.processing || !this.ready) {
+                return;
+            }
+
+            this.processing = true;
+            this.error = null;
+
+            try {
+                const submitted = await this.elements.submit();
+                if (submitted.error) {
+                    this.error = messageFor(submitted.error);
+                    this.processing = false;
+                    return;
+                }
+
+                // redirect: 'if_required' handles both shapes of 3D Secure. A
+                // modal challenge resolves inline and returns here; a challenge
+                // that needs the issuer's own page redirects away to return_url
+                // and never comes back to this line.
+                const result = await this.stripe.confirmPayment({
+                    elements: this.elements,
+                    clientSecret: config.clientSecret,
+                    confirmParams: { return_url: config.returnUrl },
+                    redirect: 'if_required',
+                });
+
+                if (result.error) {
+                    this.error = messageFor(result.error);
+                    this.processing = false;
+                    return;
+                }
+
+                // Settled without a redirect. Go to the server's return handler
+                // anyway: it is the only thing that marks the order paid, and it
+                // re-reads the outcome from Stripe rather than trusting this.
+                window.location.assign(config.returnUrl);
+            } catch (e) {
+                this.error = 'Something went wrong while confirming your payment. Your card has not been charged.';
+                this.processing = false;
+            }
+        },
+    }));
 });
+
+/**
+ * Load Stripe.js on demand and resolve with the global constructor.
+ *
+ * Loaded lazily rather than from the shared layout so the 100kb of Stripe.js is
+ * only fetched on the one page that needs it, and so no ordering relationship
+ * with the Alpine CDN has to be maintained: this resolves whenever it resolves,
+ * long after alpine:init has fired.
+ */
+let stripeJsPromise = null;
+
+function loadStripeJs() {
+    if (window.Stripe) {
+        return Promise.resolve(window.Stripe);
+    }
+
+    if (stripeJsPromise) {
+        return stripeJsPromise;
+    }
+
+    stripeJsPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://js.stripe.com/v3/';
+        script.async = true;
+        script.onload = () => (window.Stripe ? resolve(window.Stripe) : reject(new Error('stripe_unavailable')));
+        script.onerror = () => reject(new Error('stripe_load_failed'));
+        document.head.appendChild(script);
+    });
+
+    return stripeJsPromise;
+}
+
+/**
+ * Decide what a shopper is allowed to read from a Stripe error.
+ *
+ * A card error or a validation error is repeated verbatim: "your card was
+ * declined", "your card number is incomplete" are exactly what the shopper needs
+ * and hiding them makes a fixable problem look like a broken checkout.
+ *
+ * Everything else (api_error, invalid_request_error, authentication_error) is
+ * replaced. Those carry configuration detail, can quote back a key fragment, and
+ * tell the shopper nothing they can act on. This mirrors the same decision made
+ * server side in OrderPayments::shopperMessage.
+ */
+function messageFor(error) {
+    if (error && (error.type === 'card_error' || error.type === 'validation_error') && error.message) {
+        return error.message;
+    }
+
+    return 'We could not take that payment right now. Please check your details or try another card. Your card has not been charged.';
+}

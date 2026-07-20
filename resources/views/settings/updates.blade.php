@@ -6,7 +6,7 @@
     @endif
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 space-y-6">
+        <div class="min-w-0 lg:col-span-2 space-y-6">
             <x-card title="Version" subtitle="Your installed build versus the latest release published for your license.">
                 <div class="flex flex-wrap items-center gap-x-10 gap-y-4">
                     <div>

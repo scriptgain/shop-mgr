@@ -5,6 +5,24 @@ use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+/*
+ * Stripe webhook.
+ *
+ * Deliberately on the API stack, not the web one. It needs no session, no CSRF
+ * token (Stripe cannot supply one), and must not pass through the storefront's
+ * setup gate, demo-mode guard or IP firewall — all of which would turn a
+ * legitimate Stripe delivery into a redirect or a 403 and start a retry storm.
+ *
+ * Authentication is the Stripe-Signature HMAC, verified inside the controller.
+ * There is no token on this route because the signature IS the credential.
+ *
+ * Rate limited generously: Stripe can burst on retries, and throttling a real
+ * webhook into a 429 just makes it come back again.
+ */
+Route::post('stripe/webhook', \App\Http\Controllers\StripeWebhookController::class)
+    ->middleware('throttle:120,1')
+    ->name('stripe.webhook');
+
 // Merchant REST API. Bearer token (api_tokens) auth. Base: /api/v1
 // Route names are prefixed with "api." so they never collide with the web
 // resource route names (products.*, orders.*, customers.*).

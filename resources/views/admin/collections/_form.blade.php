@@ -4,7 +4,7 @@
     @if ($isEdit) @method('PUT') @endif
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 space-y-6">
+        <div class="min-w-0 lg:col-span-2 space-y-6">
             <x-card title="Details">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <x-field label="Name" for="name" required :error="$errors->first('name')" class="sm:col-span-2">
@@ -27,17 +27,7 @@
                 </div>
             </x-card>
 
-            <x-card title="Search Engine Listing">
-                <div class="space-y-5">
-                    <x-field label="SEO Title" for="seo_title" :error="$errors->first('seo_title')">
-                        <x-input id="seo_title" name="seo_title" :value="old('seo_title', $collection->seo_title)" maxlength="255" />
-                    </x-field>
-                    <x-field label="SEO Description" for="seo_description" :error="$errors->first('seo_description')">
-                        <textarea id="seo_description" name="seo_description" rows="3" maxlength="500"
-                            class="block w-full rounded-lg border-0 bg-white px-3 py-2 text-sm text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-brand-500">{{ old('seo_description', $collection->seo_description) }}</textarea>
-                    </x-field>
-                </div>
-            </x-card>
+            <x-seo-panel :entity="$collection" />
 
             <x-card title="Products" subtitle="Products included in this collection.">
                 @if ($products->isEmpty())

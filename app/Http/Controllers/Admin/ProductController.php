@@ -265,8 +265,13 @@ class ProductController extends Controller
             'vendor' => ['nullable', 'string', 'max:255'],
             'product_type' => ['nullable', 'string', 'max:255'],
             'tax_class' => ['nullable', 'string', 'max:64'],
-            'seo_title' => ['nullable', 'string', 'max:255'],
-            'seo_description' => ['nullable', 'string', 'max:500'],
+            // Per-entity SEO. The legacy seo_title/seo_description columns are
+            // no longer posted by the form; they are left on the record
+            // untouched as a read fallback.
+            'meta_title' => ['nullable', 'string', 'max:255'],
+            'meta_description' => ['nullable', 'string', 'max:500'],
+            'og_image' => ['nullable', 'url', 'max:500'],
+            'canonical_url' => ['nullable', 'url', 'max:500'],
             'collections' => ['nullable', 'array'],
             'collections.*' => ['integer', 'exists:collections,id'],
 
@@ -297,8 +302,11 @@ class ProductController extends Controller
                 'vendor' => $validated['vendor'] ?? null,
                 'product_type' => $validated['product_type'] ?? null,
                 'tax_class' => $validated['tax_class'] ?: 'standard',
-                'seo_title' => $validated['seo_title'] ?? null,
-                'seo_description' => $validated['seo_description'] ?? null,
+                'meta_title' => $validated['meta_title'] ?? null,
+                'meta_description' => $validated['meta_description'] ?? null,
+                'og_image' => $validated['og_image'] ?? null,
+                'canonical_url' => $validated['canonical_url'] ?? null,
+                'noindex' => $request->boolean('noindex'),
                 // Toggle switches post 1/0 through a hidden input.
                 'requires_shipping' => $request->boolean('requires_shipping'),
                 'is_featured' => $request->boolean('is_featured'),

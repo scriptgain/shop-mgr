@@ -68,10 +68,11 @@ class App extends Component
                 'type' => 'group',
                 'label' => 'Catalog',
                 'icon' => 'bag',
-                'active' => request()->routeIs('products.*', 'collections.*'),
+                'active' => request()->routeIs('products.*', 'collections.*', 'seo.*'),
                 'items' => [
                     ['Products', route('products.index'), 'bag', request()->routeIs('products.*')],
                     ['Collections', route('collections.index'), 'folder', request()->routeIs('collections.*')],
+                    ['SEO Health', route('seo.index'), 'globe', request()->routeIs('seo.*')],
                 ],
             ],
             [
@@ -84,6 +85,20 @@ class App extends Component
                     ['Customers', route('customers.index'), 'users', request()->routeIs('customers.*')],
                     ['Discounts', route('discounts.index'), 'tag', request()->routeIs('discounts.*')],
                 ],
+            ],
+            [
+                'type' => 'group',
+                'label' => 'Appearance',
+                'icon' => 'edit',
+                'active' => request()->routeIs('themes.*', 'templates.*'),
+                'items' => array_values(array_filter([
+                    ['Themes', route('themes.index'), 'star', request()->routeIs('themes.*')],
+                    // Editing Blade is equivalent to running code on this
+                    // server, so the entry is not even shown to non-admins.
+                    auth()->user()?->isAdmin()
+                        ? ['Templates', route('templates.index'), 'edit', request()->routeIs('templates.*')]
+                        : null,
+                ])),
             ],
             [
                 'type' => 'group',
@@ -122,9 +137,12 @@ class App extends Component
         $map = [
             'products' => ['Products', 'products.index'],
             'collections' => ['Collections', 'collections.index'],
+            'seo' => ['SEO Health', 'seo.index'],
             'orders' => ['Orders', 'orders.index'],
             'customers' => ['Customers', 'customers.index'],
             'discounts' => ['Discounts', 'discounts.index'],
+            'themes' => ['Themes', 'themes.index'],
+            'templates' => ['Templates', 'templates.index'],
             'shipping' => ['Shipping', 'shipping.index'],
             'taxes' => ['Tax', 'taxes.index'],
             'settings' => ['Settings', 'settings.index'],

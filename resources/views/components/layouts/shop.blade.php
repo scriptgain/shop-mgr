@@ -8,10 +8,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ? $title . ': ' . $storeName : $storeName }}</title>
-    <link rel="icon" type="image/svg+xml" href="{{ route('favicon.svg') }}">
-    <link rel="icon" type="image/png" sizes="64x64" href="{{ route('favicon.png') }}">
-    <link rel="apple-touch-icon" href="{{ route('favicon.apple') }}">
+    {{-- Title, description, canonical, robots, Open Graph, Twitter and JSON-LD.
+         All of it comes from SeoService via App\View\Components\Seo; no view
+         writes a meta tag by hand. --}}
+    <x-seo :fallback-title="$title" />
+    <x-favicon-links />
     {{-- Must precede the Alpine CDN in x-tailwind-cdn. Deferred scripts run in
          document order, so Alpine loaded first would fire alpine:init before
          this file could register variantPicker/quantityStepper, leaving the
@@ -21,6 +22,7 @@
     <x-accent-style />
 </head>
 <body class="h-full min-h-full shop-body">
+<x-preview-badge />
 <div x-data="{ mobileOpen: false }" class="min-h-full flex flex-col">
 
     {{-- Dark top utility bar (house style): tagline + account/cart quick links. --}}
@@ -55,8 +57,12 @@
                     {{-- Wordmark: the mark sits bare in the brand accent. No chip,
                          box, or background behind the logo (house style). --}}
                     <a href="{{ route('shop.home') }}" class="inline-flex items-center gap-2 shrink-0">
-                        <x-icon name="bag" class="w-6 h-6 text-brand-600 shrink-0" />
-                        <span class="text-lg font-semibold tracking-tight text-shop-ink truncate max-w-[10rem] sm:max-w-none">{{ $storeName }}</span>
+                        @if ($themeLogo)
+                            <img src="{{ $themeLogo }}" alt="{{ $storeName }}" class="h-8 max-w-[11rem] object-contain">
+                        @else
+                            <x-icon name="bag" class="w-6 h-6 text-brand-600 shrink-0" />
+                            <span class="text-lg font-semibold tracking-tight text-shop-ink truncate max-w-[10rem] sm:max-w-none">{{ $storeName }}</span>
+                        @endif
                     </a>
                     <nav class="hidden lg:flex items-center gap-1 ml-4">
                         <a href="{{ route('shop.catalog') }}" class="px-3 py-2 rounded-lg text-sm font-medium text-shop-ink/80 hover:text-shop-ink hover:bg-slate-100 transition">All Products</a>

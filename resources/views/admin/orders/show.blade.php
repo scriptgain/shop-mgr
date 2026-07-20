@@ -12,13 +12,19 @@
                 <x-badge :color="$order->status_badge" dot>{{ \Illuminate\Support\Str::headline($order->status) }}</x-badge>
                 <x-badge :color="$order->financial_badge" dot>{{ \Illuminate\Support\Str::headline($order->financial_status) }}</x-badge>
                 <x-badge :color="$order->fulfillment_badge" dot>{{ \Illuminate\Support\Str::headline($order->fulfillment_status) }}</x-badge>
+                @if ($order->is_test_payment)
+                    {{-- A test-mode charge must never be mistakable for revenue. --}}
+                    <x-badge color="warn" dot>Test Payment</x-badge>
+                @endif
             </x-slot:meta>
 
             <x-slot:actions>
-                @if ($order->is_paid)
+                @if ($order->is_paid && $order->refundable_cents > 0)
                     <x-button variant="secondary" size="sm" icon="refresh"
                         x-data @click="$dispatch('open-modal', 'refund-order')">Refund</x-button>
                 @endif
+                <x-button variant="secondary" size="sm" icon="envelope"
+                    x-data @click="$dispatch('open-modal', 'resend-email')">Resend Email</x-button>
                 @if ($order->is_actionable)
                     <x-button variant="secondary" size="sm" icon="x-circle"
                         x-data @click="$dispatch('open-modal', 'cancel-order')">Cancel Order</x-button>
@@ -37,7 +43,7 @@
         </x-page-header>
 
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <div class="space-y-4 lg:col-span-2">
+            <div class="min-w-0 space-y-4 lg:col-span-2">
                 <x-segmented label="Order Sections">
                     <button type="button" role="tab" :aria-selected="(tab === 'items').toString()" @click="tab = 'items'"
                         class="vx-seg-item" :class="tab === 'items' && 'is-active'">Items
@@ -56,7 +62,7 @@
                 {{-- Items --}}
                 <div x-show="tab === 'items'" x-cloak>
                     <x-card flush>
-                        <x-table flush min-width="min-w-[40rem]">
+                        <x-table flush>
                             <thead>
                                 <tr>
                                     <th>Item</th>
@@ -155,7 +161,7 @@
                             <x-empty-state icon="truck" title="Nothing Shipped Yet"
                                 description="Each shipment you create is recorded here with its carrier and tracking number, so you can see exactly what left and when." />
                         @else
-                            <x-table flush min-width="min-w-[36rem]">
+                            <x-table flush>
                                 <thead>
                                     <tr>
                                         <th>Status</th><th>Carrier</th><th>Tracking</th><th class="text-right">Items</th><th class="text-right">Shipped</th>
@@ -241,6 +247,54 @@
                     </dl>
                 </x-card>
 
+                {{-- Payment. Brand and last four are the only card details
+                     ShopMGR stores; there is nothing else here to show. --}}
+                <x-card title="Payment">
+                    <dl class="space-y-3 text-sm">
+                        <div class="flex items-center justify-between gap-3">
+                            <dt class="text-slate-500">Method</dt>
+                            <dd class="text-slate-900">{{ $order->payment_gateway === 'stripe' ? 'Card (Stripe)' : 'Manual / Offline' }}</dd>
+                        </div>
+                        @if ($order->card_label)
+                            <div class="flex items-center justify-between gap-3">
+                                <dt class="text-slate-500">Card</dt>
+                                <dd class="inline-flex items-center gap-2 text-slate-900">
+                                    <span class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded bg-slate-100 text-slate-600 ring-1 ring-slate-200">
+                                        <x-icon name="credit-card" class="h-3.5 w-3.5" />
+                                    </span>
+                                    {{ $order->card_label }}
+                                </dd>
+                            </div>
+                        @endif
+                        @if ($order->paid_at)
+                            <div class="flex items-center justify-between gap-3">
+                                <dt class="text-slate-500">Paid</dt>
+                                <dd class="text-slate-900">{{ $order->paid_at->format(config('shop.date_format').' '.config('shop.time_format')) }}</dd>
+                            </div>
+                        @endif
+                        @if ($order->payment_reference)
+                            <div class="flex items-start justify-between gap-3">
+                                <dt class="shrink-0 text-slate-500">Reference</dt>
+                                <dd class="min-w-0 break-all text-right font-mono text-xs text-slate-600">{{ $order->payment_reference }}</dd>
+                            </div>
+                        @endif
+                        @if ($order->payment_failure_reason)
+                            <div class="border-t border-slate-100 pt-3">
+                                <dt class="vx-eyebrow mb-1 text-rose-600">Last Failure</dt>
+                                <dd class="text-sm text-rose-700">{{ $order->payment_failure_reason }}</dd>
+                            </div>
+                        @endif
+                        @if ($order->is_test_payment)
+                            <div class="flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2 ring-1 ring-inset ring-amber-200">
+                                <span class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded bg-amber-100 text-amber-700 ring-1 ring-amber-200">
+                                    <x-icon name="warning" class="h-3.5 w-3.5" />
+                                </span>
+                                <p class="text-xs text-amber-800">Taken in Stripe test mode. No real money moved.</p>
+                            </div>
+                        @endif
+                    </dl>
+                </x-card>
+
                 <x-card title="Customer">
                     <div class="flex items-center gap-3">
                         <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-50 text-xs font-semibold text-brand-700 ring-1 ring-brand-200">
@@ -316,19 +370,62 @@
         </x-modal>
 
         <x-modal name="refund-order" title="Refund This Order?" icon="refresh" tone="warn" maxWidth="max-w-md">
-            Up to {{ $order->net_total_formatted }} is available to refund. Refunding here records the refund against the order. It does not move money on its own unless your payment gateway supports it.
-            <form id="refund-form" method="POST" action="{{ route('orders.refund', $order) }}" class="mt-4 space-y-4">
+            @if ($order->is_stripe_refundable)
+                {{ $order->refundable_formatted }} is available to refund. This sends the refund to Stripe and the money goes back to the customer's card, usually within five to ten business days.
+            @else
+                {{ $order->refundable_formatted }} is available to refund. This order was not paid by card, so this records the refund against the order only. You will need to return the money yourself.
+            @endif
+
+            <form id="refund-form" method="POST" action="{{ route('orders.refund', $order) }}" class="mt-4 space-y-4"
+                  x-data="{ mode: 'full' }">
                 @csrf
-                <x-field label="Amount" for="refund-amount" required>
-                    <x-input id="refund-amount" name="amount" placeholder="0.00" required />
+
+                {{-- Full is its own mode rather than the merchant retyping the
+                     total, so a full refund can never land a cent short. --}}
+                <x-field label="Amount" required>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-3 cursor-pointer select-none">
+                            <input type="radio" name="mode" value="full" x-model="mode" class="text-brand-600 focus:ring-brand-500">
+                            <span class="text-sm text-slate-700">Full Refund ({{ $order->refundable_formatted }})</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer select-none">
+                            <input type="radio" name="mode" value="partial" x-model="mode" class="text-brand-600 focus:ring-brand-500">
+                            <span class="text-sm text-slate-700">Partial Refund</span>
+                        </label>
+                    </div>
                 </x-field>
-                <x-field label="Reason" for="refund-reason" hint="Optional. Shown in the order timeline.">
-                    <x-input id="refund-reason" name="reason" placeholder="Optional" />
+
+                <div x-show="mode === 'partial'" x-cloak>
+                    <x-field label="Refund Amount" for="refund-amount" hint="Maximum {{ $order->refundable_formatted }}.">
+                        <x-input id="refund-amount" name="amount" placeholder="0.00" />
+                    </x-field>
+                </div>
+
+                <x-field label="Reason" for="refund-reason" hint="Optional. Sent to Stripe and shown in the order timeline.">
+                    <x-select id="refund-reason" name="reason">
+                        <option value="">No Reason Given</option>
+                        <option value="requested_by_customer">Requested By Customer</option>
+                        <option value="duplicate">Duplicate</option>
+                        <option value="fraudulent">Fraudulent</option>
+                    </x-select>
                 </x-field>
             </form>
             <x-slot:footer>
                 <x-button variant="secondary" size="sm" x-on:click="$dispatch('close-modal', 'refund-order')">Cancel</x-button>
-                <x-button variant="primary" size="sm" type="submit" form="refund-form" icon="refresh">Record Refund</x-button>
+                <x-button variant="primary" size="sm" type="submit" form="refund-form" icon="refresh">
+                    {{ $order->is_stripe_refundable ? 'Refund Via Stripe' : 'Record Refund' }}
+                </x-button>
+            </x-slot:footer>
+        </x-modal>
+
+        <x-modal name="resend-email" title="Resend Confirmation Email?" icon="envelope" tone="info" maxWidth="max-w-md">
+            The order confirmation will be sent again to {{ $order->email }}, with the current contents and totals.
+            <form id="resend-email-form" method="POST" action="{{ route('orders.resend-email', $order) }}" class="mt-4">
+                @csrf
+            </form>
+            <x-slot:footer>
+                <x-button variant="secondary" size="sm" x-on:click="$dispatch('close-modal', 'resend-email')">Cancel</x-button>
+                <x-button variant="primary" size="sm" type="submit" form="resend-email-form" icon="envelope">Resend Email</x-button>
             </x-slot:footer>
         </x-modal>
 

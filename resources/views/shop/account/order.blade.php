@@ -21,7 +21,7 @@
     <section class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
 
-            <div class="lg:col-span-2 space-y-8">
+            <div class="min-w-0 lg:col-span-2 space-y-8">
                 <div>
                     <h2 class="text-lg font-semibold text-shop-ink mb-4">Items</h2>
                     <div class="divide-y shop-hairline">

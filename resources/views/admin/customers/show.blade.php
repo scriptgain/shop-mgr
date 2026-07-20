@@ -32,13 +32,13 @@
     </dl>
 
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div class="space-y-6 lg:col-span-2">
+        <div class="min-w-0 space-y-6 lg:col-span-2">
             <x-card title="Order History" flush>
                 @if ($orders->isEmpty())
                     <x-empty-state icon="bag" title="No Orders From This Customer Yet"
                         description="This record exists because they registered an account. Once they buy something, every order shows up here with its payment and fulfillment status." />
                 @else
-                    <x-table flush min-width="min-w-[36rem]">
+                    <x-table flush>
                         <thead>
                             <tr>
                                 <th>Order</th><th>Payment</th><th>Fulfillment</th><th class="text-right">Total</th>

@@ -20,6 +20,9 @@ class Product extends Model
     protected $fillable = [
         'name', 'slug', 'excerpt', 'description', 'status', 'vendor', 'product_type',
         'tax_class', 'requires_shipping', 'is_featured', 'seo_title', 'seo_description', 'position',
+        // Per-entity SEO. meta_* supersede the legacy seo_* pair, which is kept
+        // as a read fallback so existing copy is never orphaned.
+        'meta_title', 'meta_description', 'og_image', 'canonical_url', 'noindex',
     ];
 
     protected function casts(): array
@@ -27,6 +30,7 @@ class Product extends Model
         return [
             'requires_shipping' => 'boolean',
             'is_featured' => 'boolean',
+            'noindex' => 'boolean',
         ];
     }
 

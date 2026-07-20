@@ -4,9 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ? $title . ' · ' . config('brand.name') : config('brand.name') }}</title>
-    <link rel="icon" type="image/svg+xml" href="{{ route('favicon.svg') }}">
-    <link rel="icon" type="image/png" sizes="64x64" href="{{ route('favicon.png') }}">
-    <link rel="apple-touch-icon" href="{{ route('favicon.apple') }}">
+    <x-favicon-links />
 
     {{-- The @font-face rules live in app.css; this just gets the file in flight
          early, since the face is used by essentially every element on the page. --}}
@@ -23,6 +21,7 @@
 </head>
 <body class="h-full min-h-full bg-slate-50">
 <x-demo-banner />
+<x-preview-badge />
 <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-slate-900 focus:shadow-lg focus:ring-2 focus:ring-brand-500">Skip To Content</a>
 <div class="flex min-h-full flex-col">
 

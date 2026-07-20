@@ -15,11 +15,15 @@ class Collection extends Model
     protected $fillable = [
         'name', 'slug', 'description', 'image_path', 'is_active', 'position',
         'seo_title', 'seo_description',
+        'meta_title', 'meta_description', 'og_image', 'canonical_url', 'noindex',
     ];
 
     protected function casts(): array
     {
-        return ['is_active' => 'boolean'];
+        return [
+            'is_active' => 'boolean',
+            'noindex' => 'boolean',
+        ];
     }
 
     protected static function booted(): void

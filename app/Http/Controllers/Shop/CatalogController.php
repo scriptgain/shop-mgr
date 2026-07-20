@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Shop;
 use App\Http\Controllers\Controller;
 use App\Models\Collection;
 use App\Models\Product;
+use App\Services\SeoService;
 use App\Support\Money;
 use Illuminate\Http\Request;
 
@@ -16,8 +17,12 @@ use Illuminate\Http\Request;
  */
 class CatalogController extends Controller
 {
+    public function __construct(private SeoService $seo) {}
+
     public function home()
     {
+        $this->seo->home();
+
         return view('shop.home', [
             'featured' => Product::storefront()
                 ->with(['variants', 'images'])
@@ -40,11 +45,15 @@ class CatalogController extends Controller
 
     public function index(Request $request)
     {
+        $products = $this->query($request)->paginate($this->perPage())->withQueryString();
+
+        $this->seo->catalog($products);
+
         return view('shop.catalog', [
             'heading' => 'All Products',
             'subheading' => null,
             'collection' => null,
-            'products' => $this->query($request)->paginate($this->perPage())->withQueryString(),
+            'products' => $products,
             'collections' => Collection::active()->orderBy('position')->get(),
             'sortOptions' => $this->sortOptions(),
             'filters' => $request->only(['sort', 'q', 'min', 'max']),
@@ -55,14 +64,18 @@ class CatalogController extends Controller
     {
         abort_unless($collection->is_active, 404);
 
+        $products = $this->query($request)
+            ->whereHas('collections', fn ($q) => $q->where('collections.id', $collection->id))
+            ->paginate($this->perPage())
+            ->withQueryString();
+
+        $this->seo->collection($collection, $products);
+
         return view('shop.catalog', [
             'heading' => $collection->name,
             'subheading' => $collection->description,
             'collection' => $collection,
-            'products' => $this->query($request)
-                ->whereHas('collections', fn ($q) => $q->where('collections.id', $collection->id))
-                ->paginate($this->perPage())
-                ->withQueryString(),
+            'products' => $products,
             'collections' => Collection::active()->orderBy('position')->get(),
             'sortOptions' => $this->sortOptions(),
             'filters' => $request->only(['sort', 'q', 'min', 'max']),
@@ -71,6 +84,8 @@ class CatalogController extends Controller
 
     public function collections()
     {
+        $this->seo->collectionsIndex();
+
         return view('shop.collections', [
             'collections' => Collection::active()
                 ->withCount('products')
@@ -83,6 +98,8 @@ class CatalogController extends Controller
     public function search(Request $request)
     {
         $term = $request->string('q')->toString();
+
+        $this->seo->search($term ?: null);
 
         return view('shop.catalog', [
             'heading' => $term ? 'Results For "'.$term.'"' : 'Search',
@@ -100,6 +117,8 @@ class CatalogController extends Controller
         abort_unless($product->status === 'active', 404);
 
         $product->load(['variants', 'images', 'collections']);
+
+        $this->seo->product($product);
 
         return view('shop.product', [
             'product' => $product,

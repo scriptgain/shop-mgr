@@ -21,7 +21,27 @@
     <section class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
 
-            <div class="lg:col-span-2 space-y-8">
+            <div class="min-w-0 lg:col-span-2 space-y-8">
+                @if ($isTestPayment)
+                    <div class="flex items-start gap-3 rounded-xl bg-amber-50 px-4 py-3 ring-1 ring-inset ring-amber-200">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-amber-100 text-amber-700 ring-1 ring-amber-200 shrink-0">
+                            <x-icon name="warning" class="w-4 h-4" />
+                        </span>
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold text-amber-900">Test Order</p>
+                            <p class="text-sm text-amber-800">This order was placed while the store was in Stripe test mode. No real payment was taken.</p>
+                        </div>
+                    </div>
+                @endif
+
+                @if ($awaitingPayment)
+                    {{-- The webhook has not landed yet. Saying "confirmed" here
+                         would be a lie the shopper discovers later. --}}
+                    <x-alert type="warn" title="Confirming Your Payment">
+                        Your bank is still confirming this payment. It usually completes within a minute. We will email you as soon as it does, and this page will show the final status when you refresh.
+                    </x-alert>
+                @endif
+
                 @if ($instructions)
                     <x-alert type="info" title="Payment Instructions">
                         <div class="whitespace-pre-line">{{ $instructions }}</div>

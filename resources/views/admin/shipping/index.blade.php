@@ -52,7 +52,7 @@
                     </div>
                 </x-slot:bulk>
 
-                <x-table flush min-width="min-w-[42rem]">
+                <x-table flush>
                     <thead>
                         <tr>
                             <th class="vx-col-select"><span class="sr-only">Select</span>@include('admin._select-all-toggle')</th>

@@ -281,3 +281,17 @@
         text-decoration: line-through;
     }
 }
+
+/*
+ * Safety net for horizontal page scroll. A grid or flex child defaults to
+ * min-width:auto, so a wide descendant (a min-w table, a long token) sizes the
+ * track to the content and the PAGE scrolls sideways instead of the region.
+ * Allowing scroll containers to shrink keeps the overflow where it belongs.
+ * The page body must never scroll horizontally.
+ */
+@layer components {
+    .vx-scroll {
+        min-width: 0;
+        max-width: 100%;
+    }
+}

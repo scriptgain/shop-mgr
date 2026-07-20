@@ -53,6 +53,24 @@
 
                 <x-button type="submit" class="w-full">Sign In</x-button>
             </form>
+            @isset($devLoginUser)
+                @if ($devLoginUser)
+                    {{-- Only rendered when the request IP matches the dev_login_ip
+                         setting. The endpoint enforces the same check, so this is
+                         a convenience, not the security boundary. --}}
+                    <div class="mt-6 section-divider pt-6">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Developer Access</p>
+                        <form method="POST" action="{{ route('dev-login') }}" class="mt-3">
+                            @csrf
+                            <x-button type="submit" variant="secondary" class="w-full">
+                                Sign In As {{ $devLoginUser->name }}
+                            </x-button>
+                        </form>
+                        <p class="mt-2 text-xs text-slate-500">Visible only from your allowlisted IP address.</p>
+                    </div>
+                @endif
+            @endisset
+
         </div>
     </div>
 
