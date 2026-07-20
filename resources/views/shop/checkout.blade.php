@@ -1,4 +1,3 @@
-@php($maxWidth = config('shop.max_width', 'max-w-6xl'))
 <x-layouts.shop title="Checkout">
 
     <section class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
@@ -161,7 +160,7 @@
                     <div class="section-divider shop-hairline"></div>
                     <div>
                         <h2 class="text-lg font-semibold text-shop-ink mb-2">Create An Account</h2>
-                        <p class="text-sm text-shop-muted mb-4">Optional — Save Your Details For Faster Checkout Next Time.</p>
+                        <p class="text-sm text-shop-muted mb-4">Optional. Save Your Details For Faster Checkout Next Time.</p>
                         <x-field label="Password" hint="Leave blank to check out as a guest.">
                             <x-input type="password" name="password" autocomplete="new-password" />
                         </x-field>

@@ -1,4 +1,3 @@
-@php($maxWidth = config('shop.max_width', 'max-w-6xl'))
 <x-layouts.shop title="Create Account">
 
     <section class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">

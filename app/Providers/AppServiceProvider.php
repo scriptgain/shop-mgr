@@ -140,6 +140,7 @@ class AppServiceProvider extends ServiceProvider
                 'cartCount' => 0,
                 'storeName' => config('shop.store_name'),
                 'currentCustomer' => null,
+                'maxWidth' => config('shop.max_width', 'max-w-6xl'),
             ];
 
             try {
@@ -160,6 +161,7 @@ class AppServiceProvider extends ServiceProvider
                     'cartCount' => $cart?->item_count ?? 0,
                     'storeName' => config('shop.store_name'),
                     'currentCustomer' => auth('customer')->user(),
+                    'maxWidth' => config('shop.max_width', 'max-w-6xl'),
                 ]);
             } catch (\Throwable $e) {
                 $view->with($defaults);

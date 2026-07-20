@@ -1,4 +1,3 @@
-@php($maxWidth = config('shop.max_width', 'max-w-6xl'))
 <x-layouts.shop title="Your Cart">
 
     <section class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
@@ -53,7 +52,7 @@
                                         <p class="mt-0.5 text-sm text-shop-muted">{{ $item->unit_price_formatted }} Each</p>
 
                                         @if ($item->is_overstocked)
-                                            <p class="mt-1.5 text-xs font-medium text-amber-600">Only {{ $item->max_quantity }} Left — Quantity Reduced At Checkout</p>
+                                            <p class="mt-1.5 text-xs font-medium text-amber-600">Only {{ $item->max_quantity }} Left. Quantity Reduced At Checkout.</p>
                                         @endif
                                         @if ($item->is_repriced)
                                             <p class="mt-1.5 text-xs font-medium text-brand-600">Price Updated Since Added</p>

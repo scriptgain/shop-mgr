@@ -1,15 +1,19 @@
-@php($maxWidth = config('shop.max_width', 'max-w-6xl'))
 <x-layouts.shop title="Order Confirmed">
 
-    <section class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-10 text-center">
-        <span class="mx-auto inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 ring-1 ring-inset ring-emerald-200">
-            <x-icon name="check-circle" class="w-7 h-7" />
-        </span>
-        <h1 class="mt-6 text-3xl sm:text-4xl font-semibold tracking-tight text-shop-ink">Thank You For Your Order</h1>
-        <p class="mt-3 text-shop-muted">
-            Order <span class="font-medium text-shop-ink">{{ $order->number }}</span> was placed on {{ $order->created_at->format('F j, Y') }}.
-            A confirmation has been sent to {{ $order->email }}.
-        </p>
+    <section class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-10">
+        {{-- Success mark reads left of the heading, not stacked above centred copy. --}}
+        <div class="flex items-start gap-4 sm:gap-5">
+            <span class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 ring-1 ring-inset ring-emerald-200 shrink-0">
+                <x-icon name="check-circle" class="w-7 h-7" />
+            </span>
+            <div class="min-w-0">
+                <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-shop-ink">Thank You For Your Order</h1>
+                <p class="mt-3 text-shop-muted max-w-2xl">
+                    Order <span class="font-medium text-shop-ink">{{ $order->number }}</span> was placed on {{ $order->created_at->format('F j, Y') }}.
+                    A confirmation has been sent to {{ $order->email }}.
+                </p>
+            </div>
+        </div>
     </section>
 
     <div class="section-divider shop-hairline"></div>

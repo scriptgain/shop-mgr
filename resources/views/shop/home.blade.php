@@ -1,4 +1,3 @@
-@php($maxWidth = config('shop.max_width', 'max-w-6xl'))
 <x-layouts.shop>
 
     {{-- Hero --}}
