@@ -6,7 +6,7 @@
 |--------------------------------------------------------------------------
 | These are DEFAULTS ONLY. Everything here is overridden at boot from DB
 | settings (AppServiceProvider + the Setting model), per the fleet's DB-driven
-| config rule — secrets and per-store config never live in .env.
+| config rule: secrets and per-store config never live in .env.
 */
 
 return [

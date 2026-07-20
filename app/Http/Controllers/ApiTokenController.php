@@ -24,7 +24,7 @@ class ApiTokenController extends Controller
 
         return redirect()->route('settings.tokens.index')
             ->with('token_plain', $plain)
-            ->with('status', 'Token created. Copy it now — it is shown only once.');
+            ->with('status', 'Token created. Copy it now: it is shown only once.');
     }
 
     public function destroy(Request $request, ApiToken $apiToken)

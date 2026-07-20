@@ -1,7 +1,7 @@
 @props(['title' => null, 'subtitle' => null, 'padding' => 'p-5 sm:p-6', 'flush' => false])
 {{-- Reusable surface. Optional header (title/subtitle + actions slot), body,
      and footer slot. `flush` removes body padding and clips content to the
-     rounded corners — use it when the body is a full-bleed table. --}}
+     rounded corners. Use it when the body is a full-bleed table. --}}
 @php $body = $flush ? '' : $padding; @endphp
 <div {{ $attributes->merge(['class' => 'bg-white rounded-xl ring-1 ring-slate-200 shadow-sm' . ($flush ? ' overflow-hidden' : '')]) }}>
     @if ($title || isset($actions))

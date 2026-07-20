@@ -15,7 +15,7 @@
                 <x-field label="Countries" for="countries" required hint="Comma-separated ISO-2 codes, or * for the rest of the world." :error="$errors->first('countries')">
                     <x-input id="countries" name="countries" :value="old('countries', implode(', ', $zone->countries ?? ['US']))" required placeholder="US, CA" />
                 </x-field>
-                <x-field label="States / Provinces" for="states" hint="Optional — blank covers the whole country." :error="$errors->first('states')">
+                <x-field label="States / Provinces" for="states" hint="Optional. Blank covers the whole country." :error="$errors->first('states')">
                     <x-input id="states" name="states" :value="old('states')" placeholder="AZ, CA, NV" />
                 </x-field>
             </div>

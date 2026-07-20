@@ -159,6 +159,35 @@ class Product extends Model
             ->sum('inventory_qty');
     }
 
+    /** Badge/rail colour for the product's status, resolved here not in a view. */
+    public function getStatusBadgeAttribute(): string
+    {
+        return [
+            'active' => 'success',
+            'draft' => 'neutral',
+            'archived' => 'danger',
+        ][$this->status] ?? 'neutral';
+    }
+
+    /**
+     * Stock tone for the inventory column: out of stock reads as a failure,
+     * at or below the low-stock threshold as a warning.
+     */
+    public function getInventoryBadgeAttribute(): string
+    {
+        if (! $this->variants->contains('track_inventory', true)) {
+            return 'neutral';
+        }
+
+        $total = $this->total_inventory;
+
+        if ($total <= 0) {
+            return 'danger';
+        }
+
+        return $total <= (int) config('shop.low_stock_threshold', 5) ? 'warn' : 'neutral';
+    }
+
     public function getIsInStockAttribute(): bool
     {
         return $this->variants->contains(fn (ProductVariant $v) => $v->is_in_stock);

@@ -50,8 +50,8 @@
                 <dl class="space-y-3 text-sm">
                     <div class="flex justify-between gap-3"><dt class="text-slate-500">Status</dt><dd><x-badge :color="$statusColor" dot>{{ $statusLabel }}</x-badge></dd></div>
                     <div class="flex justify-between gap-3"><dt class="text-slate-500">Product</dt><dd class="font-medium text-slate-900">{{ $license['product'] }}</dd></div>
-                    <div class="flex justify-between gap-3"><dt class="text-slate-500">Plan</dt><dd class="font-medium text-slate-900">{{ $license['plan'] ?: '—' }}</dd></div>
-                    <div class="flex justify-between gap-3"><dt class="text-slate-500">Key</dt><dd class="font-mono text-xs text-slate-700">{{ $keyShown ?: '—' }}</dd></div>
+                    <div class="flex justify-between gap-3"><dt class="text-slate-500">Plan</dt><dd class="font-medium text-slate-900">{{ $license['plan'] ?: ': ' }}</dd></div>
+                    <div class="flex justify-between gap-3"><dt class="text-slate-500">Key</dt><dd class="font-mono text-xs text-slate-700">{{ $keyShown ?: ': ' }}</dd></div>
                     <div class="flex justify-between gap-3"><dt class="text-slate-500">Last Checked</dt><dd class="text-slate-700">{{ $license['checked_at'] ? \Illuminate\Support\Carbon::parse($license['checked_at'])->diffForHumans() : 'Never' }}</dd></div>
                 </dl>
             </x-card>

@@ -35,7 +35,7 @@ class UpdateController extends Controller
         Setting::put('update_requested', '1');
         Setting::put('update_last_result', 'queued: requested ' . now()->toIso8601String());
 
-        return back()->with('status', 'Update queued — it will start within a minute. Refresh for the result.');
+        return back()->with('status', 'Update queued: it will start within a minute. Refresh for the result.');
     }
 
     public function toggleAuto(Request $request)

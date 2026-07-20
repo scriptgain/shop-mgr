@@ -93,7 +93,7 @@ class SetupController extends Controller
             Setting::put('setup_complete', '1');
 
             return redirect()->route('dashboard')
-                ->with('success', 'License activated — setup complete.');
+                ->with('success', 'License activated: setup complete.');
         }
 
         // Definitive rejection: clear the bad key and let them retry.

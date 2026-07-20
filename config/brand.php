@@ -9,7 +9,7 @@ return [
     // Accent hex; overrides the violet brand ramp at runtime. Settable in the UI.
     // Violet is distinct from the rest of the -MGR fleet (cyan/amber/emerald/
     // sky/indigo/bronze) and keeps rose free for destructive + failure states.
-    'accent' => env('BRAND_ACCENT', '#7c3aed'),
+    'accent' => env('BRAND_ACCENT', '#e11d48'),
     // Logo/favicon glyph (an x-icon name). Distinct per product.
     'icon' => env('BRAND_ICON', 'bag'),
 ];

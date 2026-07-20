@@ -11,7 +11,7 @@
                     <x-field label="Code" for="code" required hint="Shoppers type this at checkout." :error="$errors->first('code')">
                         <x-input id="code" name="code" :value="old('code', $discount->code)" required class="font-mono uppercase" />
                     </x-field>
-                    <x-field label="Title" for="title" hint="Internal label — not shown to shoppers." :error="$errors->first('title')">
+                    <x-field label="Title" for="title" hint="Internal label, not shown to shoppers." :error="$errors->first('title')">
                         <x-input id="title" name="title" :value="old('title', $discount->title)" />
                     </x-field>
 

@@ -25,16 +25,60 @@ class OrderController extends Controller
             ->paginate((int) config('shop.rows_per_page', 25))
             ->withQueryString();
 
+        $filters = $request->only(['q', 'status', 'financial', 'fulfillment']);
+
+        $tabCounts = [
+            'all' => Order::count(),
+            'unfulfilled' => Order::where('status', 'open')->where('fulfillment_status', 'unfulfilled')->count(),
+            'unpaid' => Order::where('status', 'open')->where('financial_status', 'pending')->count(),
+            'cancelled' => Order::where('status', 'cancelled')->count(),
+        ];
+
         return view('admin.orders.index', [
             'orders' => $orders,
-            'filters' => $request->only(['q', 'status', 'financial', 'fulfillment']),
-            'tabCounts' => [
-                'all' => Order::count(),
-                'unfulfilled' => Order::where('status', 'open')->where('fulfillment_status', 'unfulfilled')->count(),
-                'unpaid' => Order::where('status', 'open')->where('financial_status', 'pending')->count(),
-                'cancelled' => Order::where('status', 'cancelled')->count(),
-            ],
+            'filters' => $filters,
+            'tabCounts' => $tabCounts,
+            // Built here rather than in the template: working out which tab is
+            // active means comparing filter sets, which is logic.
+            'tabs' => $this->indexTabs($filters, $tabCounts),
         ]);
+    }
+
+    /**
+     * Status tabs for the orders index, each already resolved to its URL and
+     * active state.
+     */
+    private function indexTabs(array $filters, array $counts): array
+    {
+        $definitions = [
+            ['key' => 'all', 'label' => 'All', 'params' => []],
+            ['key' => 'unfulfilled', 'label' => 'Unfulfilled', 'params' => ['status' => 'open', 'fulfillment' => 'unfulfilled']],
+            ['key' => 'unpaid', 'label' => 'Unpaid', 'params' => ['status' => 'open', 'financial' => 'pending']],
+            ['key' => 'cancelled', 'label' => 'Cancelled', 'params' => ['status' => 'cancelled']],
+        ];
+
+        $current = array_filter([
+            'status' => $filters['status'] ?? null,
+            'financial' => $filters['financial'] ?? null,
+            'fulfillment' => $filters['fulfillment'] ?? null,
+        ]);
+
+        $activeKey = 'all';
+        foreach ($definitions as $tab) {
+            if ($tab['params'] == $current) {
+                $activeKey = $tab['key'];
+                break;
+            }
+        }
+
+        $search = array_filter(['q' => $filters['q'] ?? null]);
+
+        return array_map(fn ($tab) => [
+            'label' => $tab['label'],
+            'count' => $counts[$tab['key']] ?? 0,
+            'active' => $tab['key'] === $activeKey,
+            'href' => route('orders.index', array_merge($tab['params'], $search)),
+        ], $definitions);
     }
 
     public function show(Order $order)
@@ -48,7 +92,36 @@ class OrderController extends Controller
                 fn ($item) => $item->requires_shipping && $item->unfulfilled_qty > 0
             ),
             'carriers' => ['UPS', 'USPS', 'FedEx', 'DHL', 'Other'],
+            // Addresses arrive as raw JSON columns. Flattening them into
+            // display lines is formatting logic, so it happens here and the
+            // template just prints the lines.
+            'shippingLines' => $this->addressLines($order->shipping_address),
+            'billingLines' => $this->addressLines($order->billing_address),
         ]);
+    }
+
+    /** Flatten a stored address into the lines a human would write on a label. */
+    private function addressLines(?array $address): array
+    {
+        if (! $address) {
+            return [];
+        }
+
+        $city = trim(
+            ($address['city'] ?? '')
+            .(! empty($address['state']) ? ', '.$address['state'] : '')
+            .' '.($address['postcode'] ?? '')
+        );
+
+        return array_values(array_filter([
+            trim(($address['first_name'] ?? '').' '.($address['last_name'] ?? '')),
+            $address['company'] ?? null,
+            $address['line1'] ?? null,
+            $address['line2'] ?? null,
+            $city,
+            $address['country'] ?? null,
+            $address['phone'] ?? null,
+        ]));
     }
 
     /** Record a shipment against some or all of the order's line items. */
@@ -104,7 +177,7 @@ class OrderController extends Controller
             $order->syncFulfillmentStatus();
             $order->recordEvent(
                 'fulfilled',
-                'Shipment Created'.($data['tracking_number'] ?? false ? ' — '.$data['tracking_number'] : ''),
+                'Shipment Created'.($data['tracking_number'] ?? false ? ': '.$data['tracking_number'] : ''),
                 ['items' => $shipped, 'carrier' => $data['carrier'] ?? null]
             );
         });

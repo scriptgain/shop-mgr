@@ -7,7 +7,7 @@
 
     @if (session('token_plain'))
         <div class="mb-6">
-            <x-alert type="success" title="New Token — Copy It Now">
+            <x-alert type="success" title="New Token: Copy It Now">
                 <p>This is shown only once.</p>
                 <pre class="mt-2 rounded-lg bg-chrome text-slate-100 text-xs p-3 overflow-x-auto"><code>{{ session('token_plain') }}</code></pre>
                 <p class="mt-2 text-xs">Use it as <span class="font-mono">Authorization: Bearer &lt;token&gt;</span> against <span class="font-mono">{{ config('app.url') }}/api/v1</span>.</p>

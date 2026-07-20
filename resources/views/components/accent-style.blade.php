@@ -1,7 +1,7 @@
 @php $accent = config('brand.accent'); @endphp
-@if ($accent && strtolower($accent) !== '#7c3aed')
+@if ($accent && strtolower($accent) !== '#e11d48')
     {{-- Re-tint the entire brand ramp from the chosen accent (custom brands only;
-         the default violet uses the hand-tuned scale in app.css). --}}
+         the default rose uses the hand-tuned scale in app.css). --}}
     <style>
         :root {
             --accent: {{ $accent }};

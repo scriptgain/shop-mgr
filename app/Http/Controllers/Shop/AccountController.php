@@ -76,7 +76,7 @@ class AccountController extends Controller
         Auth::guard('customer')->login($customer);
         $request->session()->regenerate();
 
-        return redirect()->route('shop.account')->with('status', 'Welcome — your account is ready.');
+        return redirect()->route('shop.account')->with('status', 'Welcome. Your account is ready.');
     }
 
     public function logout(Request $request)

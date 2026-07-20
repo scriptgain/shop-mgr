@@ -131,7 +131,7 @@
                                                 <span class="text-slate-500">Guest</span>
                                             @endif
                                         </td>
-                                        <td class="font-mono text-xs">{{ $s->ip_address ?: '—' }}</td>
+                                        <td class="font-mono text-xs">{{ $s->ip_address ?: ': ' }}</td>
                                         <td class="text-slate-500">{{ $shortUa($s->user_agent) }}</td>
                                         <td class="whitespace-nowrap">{{ Carbon::createFromTimestamp($s->last_activity)->diffForHumans() }}</td>
                                         <td class="text-right">
@@ -256,7 +256,7 @@
                                             </button>
                                         </td>
                                         <td class="font-mono text-xs">{{ $ban->ip }}</td>
-                                        <td class="text-slate-500">{{ $ban->reason ?: '—' }}</td>
+                                        <td class="text-slate-500">{{ $ban->reason ?: ': ' }}</td>
                                         <td>
                                             @if ($ban->isExpired())
                                                 <x-badge color="neutral">Expired</x-badge>
@@ -357,7 +357,7 @@
                             @foreach ($attempts as $a)
                                 <tr>
                                     <td class="font-mono text-xs">{{ $a->ip }}</td>
-                                    <td class="text-slate-500">{{ $a->email ?: '—' }}</td>
+                                    <td class="text-slate-500">{{ $a->email ?: ': ' }}</td>
                                     <td>
                                         <x-badge :color="$a->attempts >= $settings['failed_login_limit'] ? 'danger' : 'warn'">
                                             {{ $a->attempts }}

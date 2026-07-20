@@ -8,10 +8,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ? $title . ' — ' . $storeName : $storeName }}</title>
+    <title>{{ $title ? $title . ': ' . $storeName : $storeName }}</title>
     <link rel="icon" type="image/svg+xml" href="{{ route('favicon.svg') }}">
     <link rel="icon" type="image/png" sizes="64x64" href="{{ route('favicon.png') }}">
     <link rel="apple-touch-icon" href="{{ route('favicon.apple') }}">
+    {{-- Must precede the Alpine CDN in x-tailwind-cdn. Deferred scripts run in
+         document order, so Alpine loaded first would fire alpine:init before
+         this file could register variantPicker/quantityStepper, leaving the
+         buy box with no price and no variant_id. --}}
+    <script src="{{ asset_v('js/storefront.js') }}" defer></script>
     <x-tailwind-cdn />
     <x-accent-style />
 </head>
@@ -218,6 +223,5 @@
         window.addEventListener('resize', hide);
     })();
 </script>
-<script src="{{ asset_v('js/storefront.js') }}" defer></script>
 </body>
 </html>

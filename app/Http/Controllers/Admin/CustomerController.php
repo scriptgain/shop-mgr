@@ -20,13 +20,34 @@ class CustomerController extends Controller
                 ->paginate((int) config('shop.rows_per_page', 25))
                 ->withQueryString(),
             'filters' => $request->only(['q', 'filter']),
-            'tabCounts' => [
-                'all' => Customer::count(),
-                'repeat' => Customer::where('orders_count', '>', 1)->count(),
-                'marketing' => Customer::where('accepts_marketing', true)->count(),
-                'guests' => Customer::whereNull('password')->count(),
-            ],
+            'tabs' => $this->indexTabs($request->only(['q', 'filter'])),
         ]);
+    }
+
+    /** Segment tabs, each already resolved to its URL, count and active state. */
+    private function indexTabs(array $filters): array
+    {
+        $counts = [
+            '' => Customer::count(),
+            'repeat' => Customer::where('orders_count', '>', 1)->count(),
+            'marketing' => Customer::where('accepts_marketing', true)->count(),
+            'guests' => Customer::whereNull('password')->count(),
+        ];
+
+        $current = $filters['filter'] ?? '';
+        $search = array_filter(['q' => $filters['q'] ?? null]);
+
+        $tabs = [];
+        foreach (['' => 'All', 'repeat' => 'Repeat', 'marketing' => 'Marketing', 'guests' => 'Guests'] as $value => $label) {
+            $tabs[] = [
+                'label' => $label,
+                'count' => $counts[$value],
+                'active' => $current === $value,
+                'href' => route('customers.index', array_filter(array_merge(['filter' => $value], $search))),
+            ];
+        }
+
+        return $tabs;
     }
 
     public function show(Customer $customer)

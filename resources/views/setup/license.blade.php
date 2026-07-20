@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Setup — Activate License — {{ config('brand.name') }}</title>
+    <title>Setup: Activate License: {{ config('brand.name') }}</title>
     <x-tailwind-cdn />
     <x-accent-style />
 </head>
@@ -18,7 +18,7 @@
             <p class="mt-4 text-slate-300 leading-relaxed">
                 Enter your {{ config('brand.name') }} license key to finish. Your key
                 unlocks updates and support. {{ config('brand.name') }} never locks you
-                out — you can always add or change your key later.
+                out: you can always add or change your key later.
             </p>
             <ul class="mt-8 space-y-3 text-sm text-slate-300">
                 <li class="flex items-center gap-2 opacity-60"><x-icon name="check-circle" class="w-5 h-5 text-brand-400" /> Admin Account Created</li>

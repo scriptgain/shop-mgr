@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sign In — {{ config('brand.name') }}</title>
+    <title>Sign In: {{ config('brand.name') }}</title>
     <x-tailwind-cdn />
     <x-accent-style />
 </head>
@@ -17,7 +17,7 @@
             <h2 class="text-3xl font-semibold tracking-tight">Your store, on your own server.</h2>
             <p class="mt-4 text-slate-300 leading-relaxed">
                 One panel for your whole catalog. Products, orders, customers, discounts,
-                shipping and tax — with a storefront your customers actually enjoy buying from.
+                shipping and tax: with a storefront your customers actually enjoy buying from.
             </p>
             <ul class="mt-8 space-y-3 text-sm text-slate-300">
                 <li class="flex items-center gap-2"><x-icon name="check-circle" class="w-5 h-5 text-brand-400" /> Variants, inventory &amp; collections</li>

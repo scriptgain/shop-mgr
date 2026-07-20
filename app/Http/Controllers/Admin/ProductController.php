@@ -29,17 +29,42 @@ class ProductController extends Controller
             ->paginate((int) config('shop.rows_per_page', 25))
             ->withQueryString();
 
+        $filters = $request->only(['q', 'status', 'collection']);
+
+        $statusCounts = [
+            'all' => Product::count(),
+            'active' => Product::where('status', 'active')->count(),
+            'draft' => Product::where('status', 'draft')->count(),
+            'archived' => Product::where('status', 'archived')->count(),
+        ];
+
         return view('admin.products.index', [
             'products' => $products,
             'collections' => Collection::orderBy('name')->get(),
-            'filters' => $request->only(['q', 'status', 'collection']),
-            'statusCounts' => [
-                'all' => Product::count(),
-                'active' => Product::where('status', 'active')->count(),
-                'draft' => Product::where('status', 'draft')->count(),
-                'archived' => Product::where('status', 'archived')->count(),
-            ],
+            'filters' => $filters,
+            'statusCounts' => $statusCounts,
+            'tabs' => $this->indexTabs($filters, $statusCounts),
+            'hasFilters' => (bool) array_filter($filters),
         ]);
+    }
+
+    /** Status tabs, each resolved to its URL and active state. */
+    private function indexTabs(array $filters, array $counts): array
+    {
+        $labels = ['' => 'All', 'active' => 'Active', 'draft' => 'Draft', 'archived' => 'Archived'];
+        $current = $filters['status'] ?? '';
+
+        $tabs = [];
+        foreach ($labels as $value => $label) {
+            $tabs[] = [
+                'label' => $label,
+                'count' => $counts[$value === '' ? 'all' : $value] ?? 0,
+                'active' => $current === $value,
+                'href' => route('products.index', array_filter(array_merge($filters, ['status' => $value]))),
+            ];
+        }
+
+        return $tabs;
     }
 
     public function create()
@@ -48,6 +73,7 @@ class ProductController extends Controller
             'product' => new Product(['status' => 'draft', 'requires_shipping' => true]),
             'collections' => Collection::orderBy('name')->get(),
             'selectedCollections' => [],
+            'initialVariants' => [],
         ]);
     }
 
@@ -81,7 +107,34 @@ class ProductController extends Controller
             'product' => $product,
             'collections' => Collection::orderBy('name')->get(),
             'selectedCollections' => $product->collections->pluck('id')->all(),
+            'initialVariants' => $this->variantPayload($product),
         ]);
+    }
+
+    /**
+     * Existing variants, shaped for the JS repeater in public/js/shop-admin.js.
+     * Money is pre-formatted to the plain string the controller expects back,
+     * since syncVariants() parses it via Money::parse().
+     */
+    private function variantPayload(Product $product): array
+    {
+        return $product->variants->map(fn (ProductVariant $variant) => [
+            'id' => $variant->id,
+            'option1_name' => $variant->option1_name,
+            'option1_value' => $variant->option1_value,
+            'option2_name' => $variant->option2_name,
+            'option2_value' => $variant->option2_value,
+            'option3_name' => $variant->option3_name,
+            'option3_value' => $variant->option3_value,
+            'sku' => $variant->sku,
+            'barcode' => $variant->barcode,
+            'price' => $variant->price_input,
+            'compare_at_price' => $variant->compare_at_input,
+            'cost' => $variant->cost_input,
+            'inventory_qty' => $variant->inventory_qty,
+            'weight_grams' => $variant->weight_grams,
+            'track_inventory' => $variant->track_inventory,
+        ])->values()->all();
     }
 
     public function update(Request $request, Product $product)

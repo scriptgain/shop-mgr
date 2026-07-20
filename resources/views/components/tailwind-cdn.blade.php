@@ -1,4 +1,4 @@
-{{-- Tailwind v4 + Alpine, served from CDN — no Vite build step.
+{{-- Tailwind v4 + Alpine, served from CDN. No Vite build step.
      The design tokens (@theme / @layer base / @layer components) come straight
      from resources/css/app.css, inlined at runtime minus the build-only
      @import/@source lines the in-browser compiler does not use. Reading the
@@ -6,7 +6,7 @@
      Blade source, so Blade never mistakes them for directives. --}}
 @php
     $tokens = @file_get_contents(resource_path('css/app.css')) ?: '';
-    // Drop @import "tailwindcss"; and @source globs — the browser build supplies
+    // Drop @import "tailwindcss"; and @source globs. The browser build supplies
     // Tailwind itself and scans the live DOM for classes instead of files.
     $tokens = preg_replace('/^[ \t]*@(?:import|source)\b[^;]*;[ \t]*\R?/m', '', $tokens);
 
@@ -15,7 +15,7 @@
     // separate x-accent-style block) avoids a cascade race against the CSS the
     // browser build injects at runtime. Mirrors x-accent-style's ramp formula.
     $accent = config('brand.accent');
-    if ($accent && strtolower($accent) !== '#7c3aed') {
+    if ($accent && strtolower($accent) !== '#e11d48') {
         $a = preg_replace('/[^#0-9a-zA-Z(),.% ]/', '', $accent); // keep it a plain color value
         $tokens .= "\n@theme {\n"
             ."  --color-brand-50: color-mix(in srgb, {$a}, white 92%);\n"

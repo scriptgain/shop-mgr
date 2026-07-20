@@ -133,7 +133,7 @@ class UpdateService
                 '--exclude=storage', '--exclude=node_modules', '--exclude=.git', '--exclude=vendor', '--exclude=*.bak*',
                 '.'], $log);
         } catch (\Throwable $e) {
-            $log('WARNING: backup incomplete — ' . trim($e->getMessage()));
+            $log('WARNING: backup incomplete: ' . trim($e->getMessage()));
         }
 
         // Extract the new build over the install. The tarball is rooted at the

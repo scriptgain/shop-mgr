@@ -19,7 +19,7 @@
             </x-field>
         </x-card>
 
-        <x-card title="Manual / Offline Payment" subtitle="Always available as a fallback — orders can be placed before any gateway is wired up.">
+        <x-card title="Manual / Offline Payment" subtitle="Always available as a fallback, so orders can be placed before any gateway is wired up.">
             <div class="space-y-5">
                 <x-toggle name="manual_enabled" :checked="$checked('manual_enabled', true)" label="Enabled" />
                 <x-field label="Payment Instructions" for="manual_instructions" hint="Shown to the shopper at checkout and on the order confirmation." :error="$errors->first('manual_instructions')">
@@ -63,7 +63,7 @@
                 </div>
 
                 <x-alert type="info">
-                    Secrets are write-only — they never render back into this form. Leaving a secret field blank keeps
+                    Secrets are write-only and never render back into this form. Leaving a secret field blank keeps
                     the value already saved; type a new one only to replace it.
                 </x-alert>
             </div>

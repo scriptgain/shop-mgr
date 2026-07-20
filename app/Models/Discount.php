@@ -148,7 +148,7 @@ class Discount extends Model
             'percentage' => Money::bpsToPercent((int) $this->value).' Off',
             'fixed_amount' => Money::format((int) $this->value).' Off',
             'free_shipping' => 'Free Shipping',
-            default => '—',
+            default => 'Not set',
         };
     }
 

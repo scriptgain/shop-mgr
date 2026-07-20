@@ -67,7 +67,7 @@ class LicenseController extends Controller
     {
         return match ($r['state']) {
             'valid' => 'License validated successfully.',
-            'grace' => 'ScriptGain was unreachable, but your last check was valid — running on grace period.',
+            'grace' => 'ScriptGain was unreachable, but your last check was valid: running on grace period.',
             'invalid' => 'License Key Invalid: ' . ($r['message'] ?? 'rejected by ScriptGain') . '.',
             'unverified' => 'Could not verify the license right now. ' . ($r['message'] ?? ''),
             'unlicensed' => 'No license key entered.',

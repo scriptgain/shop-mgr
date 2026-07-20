@@ -1,73 +1,76 @@
-@props(['title' => null, 'maxWidth' => 'max-w-7xl'])
-@php
-    $u = auth()->user();
-    $initials = \Illuminate\Support\Str::of($u?->name ?? 'Admin')
-        ->explode(' ')->filter()->take(2)->map(fn ($p) => mb_strtoupper(mb_substr($p, 0, 1)))->implode('');
-@endphp
 <!DOCTYPE html>
 <html lang="en" class="h-full">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $title ? $title . ' — ' . config('brand.name') : config('brand.name') }}</title>
+    <title>{{ $title ? $title . ' · ' . config('brand.name') : config('brand.name') }}</title>
     <link rel="icon" type="image/svg+xml" href="{{ route('favicon.svg') }}">
     <link rel="icon" type="image/png" sizes="64x64" href="{{ route('favicon.png') }}">
     <link rel="apple-touch-icon" href="{{ route('favicon.apple') }}">
+
+    {{-- The @font-face rules live in app.css; this just gets the file in flight
+         early, since the face is used by essentially every element on the page. --}}
+    <link rel="preload" as="font" type="font/woff2" href="{{ asset('fonts/instrument-sans-latin.woff2') }}" crossorigin>
+
+    {{-- Must precede the Alpine CDN in x-tailwind-cdn. Deferred scripts run in
+         document order, so Alpine loaded first would fire alpine:init before
+         this file could register dashboardSparkline/variantRepeater/imagePreview,
+         leaving the dashboard chart blank and the product variant editor with
+         no rows at all. --}}
+    <script defer src="{{ asset_v('js/shop-admin.js') }}"></script>
     <x-tailwind-cdn />
     <x-accent-style />
 </head>
 <body class="h-full min-h-full bg-slate-50">
 <x-demo-banner />
-<div class="min-h-full flex flex-col">
+<a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-slate-900 focus:shadow-lg focus:ring-2 focus:ring-brand-500">Skip To Content</a>
+<div class="flex min-h-full flex-col">
 
     {{-- Brand accent hairline --}}
     <div class="h-0.5 bg-gradient-to-r from-brand-600 via-brand-400 to-brand-600"></div>
 
     {{-- Dark top utility bar (house style) --}}
-    <div class="bg-chrome text-slate-300 text-sm ring-1 ring-inset ring-white/5">
+    <div class="bg-chrome text-sm text-slate-300 ring-1 ring-inset ring-white/5">
         <div class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex h-12 items-center justify-between gap-4">
                 <x-brand class="text-white" />
                 <div class="flex items-center gap-2 sm:gap-3">
-                    <span class="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-emerald-400/10 px-2.5 py-1 text-xs font-medium text-emerald-300 ring-1 ring-inset ring-emerald-400/20">
+                    <span class="hidden items-center gap-1.5 rounded-full bg-emerald-400/10 px-2.5 py-1 text-xs font-medium text-emerald-300 ring-1 ring-inset ring-emerald-400/20 sm:inline-flex">
                         <span class="relative flex h-1.5 w-1.5">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75 motion-reduce:animate-none"></span>
                             <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
                         </span>
                         Operational
                     </span>
-                    <span class="hidden sm:inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-xs font-medium text-white ring-1 ring-inset ring-white/10">
-                        <x-icon name="cloud" class="w-3.5 h-3.5" /> Production
-                    </span>
-                    <a href="{{ route('shop.home') }}" target="_blank" rel="noopener" title="View Store" class="hidden md:inline-flex items-center gap-1.5 px-2.5 h-8 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition text-xs font-medium">
-                        <x-icon name="external" class="w-4 h-4" /> View Store
+                    <a href="{{ route('shop.home') }}" target="_blank" rel="noopener"
+                        class="hidden h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium text-slate-300 transition hover:bg-white/10 hover:text-white md:inline-flex">
+                        <x-icon name="external" class="h-4 w-4" aria-hidden="true" /> View Store
                     </a>
-                    <span class="hidden sm:inline-block h-5 w-px bg-white/10"></span>
+                    <span class="hidden h-5 w-px bg-white/10 sm:inline-block"></span>
                     <x-dropdown align="right">
                         <x-slot:trigger>
-                            <button class="inline-flex items-center gap-2 rounded-full py-1 pl-1 pr-2 hover:bg-white/10 transition">
-                                <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-brand-500/20 text-brand-200 text-xs font-semibold ring-1 ring-brand-400/40">{{ $initials }}</span>
-                                <span class="hidden sm:block text-xs font-medium text-slate-200 max-w-[8rem] truncate">{{ \Illuminate\Support\Str::of($u?->name ?? 'Admin')->explode(' ')->first() }}</span>
-                                <x-icon name="chevron-down" class="w-4 h-4 text-slate-400" />
+                            <button class="inline-flex items-center gap-2 rounded-full py-1 pl-1 pr-2 transition hover:bg-white/10">
+                                <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand-500/20 text-xs font-semibold text-brand-200 ring-1 ring-brand-400/40">{{ $initials }}</span>
+                                <span class="hidden max-w-[8rem] truncate text-xs font-medium text-slate-200 sm:block">{{ \Illuminate\Support\Str::of(auth()->user()?->name ?? 'Admin')->explode(' ')->first() }}</span>
+                                <x-icon name="chevron-down" class="h-4 w-4 text-slate-400" aria-hidden="true" />
                             </button>
                         </x-slot:trigger>
-                        @if ($u)
-                            <div class="px-3 py-2.5 border-b border-slate-100">
-                                <p class="text-sm font-medium text-slate-900 truncate">{{ $u->name }}</p>
-                                <p class="text-xs text-slate-500 truncate">{{ $u->email }}</p>
-                                @if ($u->isAdmin())<span class="mt-1.5 inline-flex items-center rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-700 ring-1 ring-inset ring-brand-200">Admin</span>@endif
+                        @auth
+                            <div class="border-b border-slate-100 px-3 py-2.5">
+                                <p class="truncate text-sm font-medium text-slate-900">{{ auth()->user()->name }}</p>
+                                <p class="truncate text-xs text-slate-500">{{ auth()->user()->email }}</p>
                             </div>
-                        @endif
+                        @endauth
                         <x-dropdown-item icon="settings" href="{{ route('settings.index') }}">Settings</x-dropdown-item>
-                        @if ($u && $u->isAdmin())
-                            <x-dropdown-item icon="users" href="{{ route('settings.users.index') }}">Users & Admins</x-dropdown-item>
+                        @if (auth()->user()?->isAdmin())
+                            <x-dropdown-item icon="users" href="{{ route('settings.users.index') }}">Users &amp; Admins</x-dropdown-item>
                             <x-dropdown-item icon="book" href="{{ route('settings.audit.index') }}">Audit Log</x-dropdown-item>
                         @endif
                         <div class="my-1 border-t border-slate-100"></div>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="flex w-full items-center gap-2 px-3 py-2 text-sm text-left text-rose-600 hover:bg-rose-50">
-                                <x-icon name="x-circle" class="w-4 h-4 shrink-0" /> Sign Out
+                            <button type="submit" class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-rose-600 hover:bg-rose-50">
+                                <x-icon name="x-circle" class="h-4 w-4 shrink-0" aria-hidden="true" /> Sign Out
                             </button>
                         </form>
                     </x-dropdown>
@@ -76,78 +79,42 @@
         </div>
     </div>
 
-    {{-- Main navbar (light, sticky, mobile-friendly). Grouped into a few
-         top-level items; related sections collapse under dropdowns. --}}
-    @php
-        $nav = [
-            ['type' => 'link', 'label' => 'Dashboard', 'href' => route('dashboard'), 'icon' => 'dashboard',
-                'active' => request()->routeIs('dashboard')],
-            ['type' => 'group', 'label' => 'Catalog', 'icon' => 'bag',
-                'active' => request()->routeIs('products.*', 'collections.*'),
-                'items' => [
-                    ['Products', route('products.index'), 'bag', request()->routeIs('products.*')],
-                    ['Collections', route('collections.index'), 'folder', request()->routeIs('collections.*')],
-                ]],
-            ['type' => 'group', 'label' => 'Sales', 'icon' => 'credit-card',
-                'active' => request()->routeIs('orders.*', 'customers.*', 'discounts.*'),
-                'items' => [
-                    ['Orders', route('orders.index'), 'credit-card', request()->routeIs('orders.*')],
-                    ['Customers', route('customers.index'), 'users', request()->routeIs('customers.*')],
-                    ['Discounts', route('discounts.index'), 'tag', request()->routeIs('discounts.*')],
-                ]],
-            ['type' => 'group', 'label' => 'Configuration', 'icon' => 'truck',
-                'active' => request()->routeIs('shipping.*', 'taxes.*'),
-                'items' => [
-                    ['Shipping', route('shipping.index'), 'truck', request()->routeIs('shipping.*')],
-                    ['Tax', route('taxes.index'), 'percent', request()->routeIs('taxes.*')],
-                ]],
-        ];
-        // If the current route is inside a top-nav group, expose that group's items
-        // so the layout can render a left menu for it (same pattern as settings).
-        $activeGroupItems = null;
-        foreach ($nav as $navItem) {
-            if (($navItem['type'] ?? '') === 'group' && ($navItem['active'] ?? false)) {
-                $activeGroupItems = $navItem['items'];
-                break;
-            }
-        }
-    @endphp
-    <header x-data="{ mobileOpen: false }" class="bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 border-b border-slate-200 sticky top-0 z-30">
+    {{-- Main navbar --}}
+    <header x-data="{ mobileOpen: false }" class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
         <div class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex h-14 items-center justify-between gap-3">
-                <div class="flex items-center gap-1 min-w-0">
-                    <button type="button" @click="mobileOpen = !mobileOpen" :aria-expanded="mobileOpen.toString()" aria-label="Toggle menu"
-                        class="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg text-slate-600 hover:bg-slate-100 transition shrink-0">
-                        <svg x-show="!mobileOpen" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" /></svg>
-                        <svg x-show="mobileOpen" x-cloak class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+                <div class="flex min-w-0 items-center gap-1">
+                    <button type="button" @click="mobileOpen = ! mobileOpen" :aria-expanded="mobileOpen.toString()" aria-label="Toggle Menu"
+                        class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-600 transition hover:bg-slate-100 lg:hidden">
+                        <svg x-show="! mobileOpen" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" /></svg>
+                        <svg x-show="mobileOpen" x-cloak class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
                     </button>
-                    <nav class="hidden lg:flex items-center gap-1">
+                    <nav class="hidden items-center gap-1 lg:flex" aria-label="Main">
                         @foreach ($nav as $item)
                             @if ($item['type'] === 'link')
                                 <x-nav-link :href="$item['href']" :icon="$item['icon']" :active="$item['active']">{{ $item['label'] }}</x-nav-link>
                             @else
-                                @php $gActive = $item['active']; @endphp
                                 <div x-data="{ open: false }" class="relative" @click.outside="open = false" @keydown.escape="open = false">
-                                    <button type="button" @click="open = !open" :aria-expanded="open.toString()"
+                                    <button type="button" @click="open = ! open" :aria-expanded="open.toString()"
                                         @class([
-                                            'inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition ring-1 ring-inset',
-                                            'text-brand-700 bg-brand-50 ring-brand-200' => $gActive,
-                                            'text-slate-600 ring-transparent hover:text-slate-900 hover:bg-slate-100 hover:ring-slate-200' => ! $gActive,
+                                            'inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ring-1 ring-inset transition',
+                                            'bg-brand-50 text-brand-700 ring-brand-200' => $item['active'],
+                                            'text-slate-600 ring-transparent hover:bg-slate-100 hover:text-slate-900 hover:ring-slate-200' => ! $item['active'],
                                         ])>
-                                        <x-icon :name="$item['icon']" class="w-4 h-4 shrink-0" />
+                                        <x-icon :name="$item['icon']" class="h-4 w-4 shrink-0" aria-hidden="true" />
                                         {{ $item['label'] }}
-                                        <x-icon name="chevron-down" class="w-4 h-4 -mr-0.5 text-slate-400 transition-transform" ::class="open && 'rotate-180'" />
+                                        <x-icon name="chevron-down" class="-mr-0.5 h-4 w-4 text-slate-400 transition-transform" ::class="open && 'rotate-180'" aria-hidden="true" />
                                     </button>
                                     <div x-show="open" x-cloak x-transition
-                                         class="absolute left-0 z-40 mt-2 w-56 origin-top-left rounded-lg bg-white shadow-lg ring-1 ring-slate-200 py-1"
+                                         class="absolute left-0 z-40 mt-2 w-56 origin-top-left rounded-lg bg-white py-1 shadow-lg ring-1 ring-slate-200"
                                          @click="open = false">
                                         @foreach ($item['items'] as [$label, $href, $icon, $active])
                                             <a href="{{ $href }}" @class([
                                                 'flex items-center gap-2.5 px-3 py-2 text-sm transition',
-                                                'text-brand-700 bg-brand-50 font-medium' => $active,
+                                                'bg-brand-50 font-medium text-brand-700' => $active,
                                                 'text-slate-700 hover:bg-slate-100' => ! $active,
                                             ])>
-                                                <x-icon :name="$icon" class="w-4 h-4 shrink-0 {{ $active ? 'text-brand-600' : 'text-slate-400' }}" /> {{ $label }}
+                                                <x-icon :name="$icon" class="h-4 w-4 shrink-0 {{ $active ? 'text-brand-600' : 'text-slate-400' }}" aria-hidden="true" /> {{ $label }}
                                             </a>
                                         @endforeach
                                     </div>
@@ -156,7 +123,7 @@
                         @endforeach
                     </nav>
                 </div>
-                <div class="flex items-center gap-2 shrink-0">
+                <div class="flex shrink-0 items-center gap-2">
                     <x-button href="{{ route('products.create') }}" icon="plus" size="sm"><span class="hidden sm:inline">New Product</span><span class="sm:hidden">New</span></x-button>
                 </div>
             </div>
@@ -164,28 +131,28 @@
         {{-- Mobile slide-down menu --}}
         <div x-show="mobileOpen" x-cloak
              x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
-             class="lg:hidden border-t border-slate-100 bg-white shadow-sm">
-            <nav class="{{ $maxWidth }} mx-auto px-4 sm:px-6 py-3 space-y-3">
+             class="border-t border-slate-100 bg-white shadow-sm lg:hidden">
+            <nav class="{{ $maxWidth }} mx-auto space-y-3 px-4 py-3 sm:px-6" aria-label="Main">
                 @foreach ($nav as $item)
                     @if ($item['type'] === 'link')
                         <a href="{{ $item['href'] }}" @class([
-                            'flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition',
+                            'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition',
                             'bg-brand-50 text-brand-700 ring-1 ring-inset ring-brand-200' => $item['active'],
                             'text-slate-600 hover:bg-slate-100' => ! $item['active'],
                         ])>
-                            <x-icon :name="$item['icon']" class="w-4 h-4 shrink-0" /> {{ $item['label'] }}
+                            <x-icon :name="$item['icon']" class="h-4 w-4 shrink-0" aria-hidden="true" /> {{ $item['label'] }}
                         </a>
                     @else
                         <div>
-                            <p class="px-3 pb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $item['label'] }}</p>
+                            <p class="vx-eyebrow px-3 pb-2">{{ $item['label'] }}</p>
                             <div class="grid grid-cols-2 gap-1.5">
                                 @foreach ($item['items'] as [$label, $href, $icon, $active])
                                     <a href="{{ $href }}" @class([
-                                        'flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition',
+                                        'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition',
                                         'bg-brand-50 text-brand-700 ring-1 ring-inset ring-brand-200' => $active,
                                         'text-slate-600 hover:bg-slate-100' => ! $active,
                                     ])>
-                                        <x-icon :name="$icon" class="w-4 h-4 shrink-0" /> {{ $label }}
+                                        <x-icon :name="$icon" class="h-4 w-4 shrink-0" aria-hidden="true" /> {{ $label }}
                                     </a>
                                 @endforeach
                             </div>
@@ -196,43 +163,20 @@
         </div>
     </header>
 
-    {{-- Breadcrumbs (auto-derived from the current route + page title) --}}
-    @php
-        $rn = request()->route()?->getName() ?? '';
-        $section = strtok($rn, '.');
-        $sectionMap = [
-            'products' => ['Products', 'products.index'],
-            'collections' => ['Collections', 'collections.index'],
-            'orders' => ['Orders', 'orders.index'],
-            'customers' => ['Customers', 'customers.index'],
-            'discounts' => ['Discounts', 'discounts.index'],
-            'shipping' => ['Shipping', 'shipping.index'],
-            'taxes' => ['Tax', 'taxes.index'],
-            'settings' => ['Settings', 'settings.index'],
-        ];
-        $crumbs = [];
-        if (isset($sectionMap[$section])) {
-            [$secLabel, $secIndex] = $sectionMap[$section];
-            $isIndex = $rn === $secIndex;
-            $crumbs[] = ['label' => $secLabel, 'href' => $isIndex ? null : route($secIndex)];
-            if (! $isIndex && $title && $title !== $secLabel) {
-                $crumbs[] = ['label' => $title, 'href' => null];
-            }
-        }
-    @endphp
-    @if ($rn !== 'dashboard' && count($crumbs))
-        <div class="bg-white border-b border-slate-200">
+    {{-- Breadcrumbs --}}
+    @if (! $isDashboard && count($crumbs))
+        <div class="border-b border-slate-200 bg-white">
             <div class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8">
-                <nav class="flex items-center gap-2 h-10 text-sm" aria-label="Breadcrumb">
-                    <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-1.5 text-slate-500 hover:text-brand-700 transition">
-                        <x-icon name="home" class="w-4 h-4" /> Dashboard
+                <nav class="flex h-10 items-center gap-2 text-sm" aria-label="Breadcrumb">
+                    <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-1.5 text-slate-500 transition hover:text-brand-700">
+                        <x-icon name="home" class="h-4 w-4" aria-hidden="true" /> Dashboard
                     </a>
-                    @foreach ($crumbs as $c)
-                        <x-icon name="chevron-right" class="w-4 h-4 text-slate-300 shrink-0" />
-                        @if ($c['href'])
-                            <a href="{{ $c['href'] }}" class="text-slate-500 hover:text-brand-700 transition">{{ $c['label'] }}</a>
+                    @foreach ($crumbs as $crumb)
+                        <x-icon name="chevron-right" class="h-4 w-4 shrink-0 text-slate-300" aria-hidden="true" />
+                        @if ($crumb['href'])
+                            <a href="{{ $crumb['href'] }}" class="text-slate-500 transition hover:text-brand-700">{{ $crumb['label'] }}</a>
                         @else
-                            <span class="font-medium text-slate-900 truncate max-w-[18rem]">{{ $c['label'] }}</span>
+                            <span class="max-w-[18rem] truncate font-medium text-slate-900" aria-current="page">{{ $crumb['label'] }}</span>
                         @endif
                     @endforeach
                 </nav>
@@ -241,7 +185,7 @@
     @endif
 
     {{-- Page content --}}
-    <main class="flex-1 py-8">
+    <main id="main" class="flex-1 py-8">
         <div class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8">
             <x-license-banner class="mb-6" />
             <x-update-banner />
@@ -259,7 +203,7 @@
             @elseif ($activeGroupItems)
                 <div class="settings-shell">
                     <aside class="settings-aside"><x-side-menu :items="$activeGroupItems" /></aside>
-                    <div>{{ $slot }}</div>
+                    <div class="min-w-0">{{ $slot }}</div>
                 </div>
             @else
                 {{ $slot }}
@@ -269,7 +213,7 @@
 
     {{-- Footer --}}
     <footer class="border-t border-slate-200 bg-white">
-        <div class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+        <div class="{{ $maxWidth }} mx-auto flex flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs text-slate-500 sm:px-6 lg:px-8">
             <span>{{ config('brand.name') }} &middot; {{ config('brand.tagline') }}</span>
             <span class="tabular">v{{ \App\Services\UpdateService::currentVersion() }}</span>
         </div>
@@ -278,9 +222,8 @@
 </div>
 
 {{-- Global tooltip: a single fixed-position element on <body> that reads
-     [data-tip]. Fixed positioning means no ancestor's overflow can ever clip
-     it (unlike a CSS ::after tip). Supports multi-line tips (newlines in the
-     attribute render as line breaks). --}}
+     [data-tip]. Fixed positioning means no ancestor's overflow can ever clip it
+     (unlike a CSS ::after tip). Supports multi-line tips. --}}
 <style>
     .vx-tip{position:fixed;z-index:9999;max-width:22rem;padding:.5rem .625rem;border-radius:.5rem;background:#0f172a;color:#f8fafc;font-size:.75rem;line-height:1.2rem;white-space:pre-line;box-shadow:0 8px 24px rgba(2,6,23,.22);pointer-events:none;opacity:0;transition:opacity .12s ease;display:none}
     .vx-tip strong{color:#fff}
@@ -317,10 +260,11 @@
         function hide() { if (tip) { tip.style.opacity = '0'; tip.style.display = 'none'; } }
         document.addEventListener('mouseover', function (e) { var el = e.target.closest('[data-tip]'); if (el) show(el); });
         document.addEventListener('mouseout', function (e) { var el = e.target.closest('[data-tip]'); if (el) hide(); });
+        document.addEventListener('focusin', function (e) { var el = e.target.closest('[data-tip]'); if (el) show(el); });
+        document.addEventListener('focusout', hide);
         document.addEventListener('scroll', hide, true);
         window.addEventListener('resize', hide);
     })();
 </script>
-<script defer src="{{ asset_v('js/shop-admin.js') }}"></script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Two-Factor — {{ config('brand.name') }}</title>
+    <title>Two-Factor: {{ config('brand.name') }}</title>
     <x-tailwind-cdn />
     <x-accent-style />
 </head>

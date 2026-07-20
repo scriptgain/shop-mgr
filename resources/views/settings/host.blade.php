@@ -21,15 +21,15 @@
             <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
                 <div class="flex items-center justify-between gap-4">
                     <dt class="text-slate-500">Common Name</dt>
-                    <dd class="font-medium text-slate-900 font-mono truncate">{{ $status['subject'] ?: '—' }}</dd>
+                    <dd class="font-medium text-slate-900 font-mono truncate">{{ $status['subject'] ?: ': ' }}</dd>
                 </div>
                 <div class="flex items-center justify-between gap-4">
                     <dt class="text-slate-500">Issuer</dt>
-                    <dd class="font-medium text-slate-900 truncate">{{ $status['issuer'] ?: '—' }}</dd>
+                    <dd class="font-medium text-slate-900 truncate">{{ $status['issuer'] ?: ': ' }}</dd>
                 </div>
                 <div class="flex items-center justify-between gap-4">
                     <dt class="text-slate-500">Expires</dt>
-                    <dd class="font-medium text-slate-900">{{ $status['expires_at'] ?? '—' }}</dd>
+                    <dd class="font-medium text-slate-900">{{ $status['expires_at'] ?? ': ' }}</dd>
                 </div>
                 <div class="flex items-center justify-between gap-4">
                     <dt class="text-slate-500">Status</dt>

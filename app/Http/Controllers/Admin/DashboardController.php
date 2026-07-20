@@ -35,7 +35,25 @@ class DashboardController extends Controller
         $revenuePrev = (clone $paid)->whereBetween('created_at', [$prevStart, $monthStart])
             ->sum(DB::raw('total_cents - refunded_cents'));
 
+        $awaitingFulfillment = Order::where('status', 'open')
+            ->whereIn('fulfillment_status', ['unfulfilled', 'partially_fulfilled'])
+            ->count();
+        $awaitingPayment = Order::where('status', 'open')
+            ->where('financial_status', 'pending')
+            ->count();
+        $lowStockCount = ProductVariant::where('track_inventory', true)
+            ->where('inventory_qty', '>', 0)
+            ->where('inventory_qty', '<=', (int) config('shop.low_stock_threshold', 5))
+            ->count();
+
         return view('admin.dashboard', [
+            // Cents alongside the formatted string: the display treatment splits
+            // the symbol and the fractional part, which needs the exact value
+            // rather than a string it would have to take apart again.
+            'revenueMonthCents' => (int) $revenueMonth,
+            'revenueTodayCents' => (int) $revenueToday,
+            'avgOrderCents' => $ordersMonth > 0 ? (int) round($revenueMonth / $ordersMonth) : 0,
+            'ordersMonth' => $ordersMonth,
             'stats' => [
                 'revenue_today' => Money::format((int) $revenueToday),
                 'revenue_month' => Money::format((int) $revenueMonth),
@@ -44,17 +62,13 @@ class DashboardController extends Controller
             ],
             'revenueTrend' => $this->trend((int) $revenueMonth, (int) $revenuePrev),
 
-            // The three "needs attention" counts that drive the action tiles.
-            'awaitingFulfillment' => Order::where('status', 'open')
-                ->whereIn('fulfillment_status', ['unfulfilled', 'partially_fulfilled'])
-                ->count(),
-            'awaitingPayment' => Order::where('status', 'open')
-                ->where('financial_status', 'pending')
-                ->count(),
-            'lowStockCount' => ProductVariant::where('track_inventory', true)
-                ->where('inventory_qty', '>', 0)
-                ->where('inventory_qty', '<=', (int) config('shop.low_stock_threshold', 5))
-                ->count(),
+            'awaitingFulfillment' => $awaitingFulfillment,
+            'awaitingPayment' => $awaitingPayment,
+            'lowStockCount' => $lowStockCount,
+
+            // The worklist is built here, not in the view: which rows appear,
+            // in what order, and with which verb is editorial logic.
+            'worklist' => $this->worklist($awaitingFulfillment, $awaitingPayment, $lowStockCount),
 
             'recentOrders' => Order::with('customer')->latest()->limit(8)->get(),
 
@@ -79,6 +93,47 @@ class DashboardController extends Controller
             // 30 daily buckets for the sales sparkline, pre-shaped for the JS.
             'salesSeries' => $this->salesSeries($monthStart),
         ]);
+    }
+
+    /**
+     * The "needs attention" worklist, ordered by how much it costs the merchant
+     * to ignore it: unshipped orders annoy a paying customer, unpaid orders are
+     * money not yet collected, low stock is a future problem.
+     *
+     * Rows with a zero count are dropped rather than rendered as a grey "0",
+     * so the panel only ever shows real work. An all-clear row replaces them
+     * when there is nothing to do.
+     */
+    private function worklist(int $awaitingFulfillment, int $awaitingPayment, int $lowStock): array
+    {
+        $rows = [
+            [
+                'count' => $awaitingFulfillment,
+                'label' => $awaitingFulfillment === 1 ? 'Order Waiting To Ship' : 'Orders Waiting To Ship',
+                'action' => 'Fulfill',
+                'icon' => 'truck',
+                'tone' => 'warn',
+                'href' => route('orders.index', ['status' => 'open', 'fulfillment' => 'unfulfilled']),
+            ],
+            [
+                'count' => $awaitingPayment,
+                'label' => $awaitingPayment === 1 ? 'Order Awaiting Payment' : 'Orders Awaiting Payment',
+                'action' => 'Review',
+                'icon' => 'credit-card',
+                'tone' => 'danger',
+                'href' => route('orders.index', ['status' => 'open', 'financial' => 'pending']),
+            ],
+            [
+                'count' => $lowStock,
+                'label' => $lowStock === 1 ? 'Variant Running Low' : 'Variants Running Low',
+                'action' => 'Restock',
+                'icon' => 'box',
+                'tone' => 'info',
+                'href' => route('products.index'),
+            ],
+        ];
+
+        return array_values(array_filter($rows, fn ($row) => $row['count'] > 0));
     }
 
     /** Best sellers by units, over the reporting window. */
@@ -134,7 +189,7 @@ class DashboardController extends Controller
     private function trend(int $current, int $previous): array
     {
         if ($previous <= 0) {
-            return ['label' => $current > 0 ? 'New' : '—', 'tone' => $current > 0 ? 'success' : 'neutral'];
+            return ['label' => $current > 0 ? 'New' : 'No sales', 'tone' => $current > 0 ? 'success' : 'neutral'];
         }
 
         $delta = (int) round((($current - $previous) / $previous) * 100);
