@@ -30,8 +30,8 @@
                     <div class="mt-4 grid grid-cols-5 gap-3">
                         @foreach ($product->images as $image)
                             <button type="button" @click="active = {{ $loop->index }}"
-                                class="shop-media rounded-lg ring-1 ring-inset transition"
-                                :class="active === {{ $loop->index }} ? 'ring-brand-600 ring-2' : 'shop-hairline'">
+                                class="shop-media rounded-lg transition"
+                                :class="active === {{ $loop->index }} && 'ring-2 ring-inset ring-brand-600'">
                                 <img src="{{ $image->url }}" alt="{{ $image->alt_text }}" loading="lazy">
                             </button>
                         @endforeach
@@ -81,7 +81,9 @@
                     </template>
 
                     <div class="flex items-stretch gap-3">
-                        <div class="inline-flex items-center rounded-lg ring-1 ring-inset shop-hairline shrink-0" x-data="quantityStepper(1)">
+                        {{-- overflow-hidden clips each button's hover background to the
+                             rounded corners, so it cannot bleed over the ring border. --}}
+                        <div class="inline-flex items-center overflow-hidden rounded-lg ring-1 ring-inset shop-hairline shrink-0" x-data="quantityStepper(1)">
                             <button type="button" @click="dec()" class="w-11 h-11 flex items-center justify-center text-shop-ink hover:bg-slate-100 transition rounded-l-lg" aria-label="Decrease Quantity">
                                 <x-icon name="minus" class="w-4 h-4" />
                             </button>

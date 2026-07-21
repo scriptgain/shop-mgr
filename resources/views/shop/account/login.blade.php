@@ -15,6 +15,7 @@
                         <x-input type="password" id="password" name="password" required autocomplete="current-password" />
                     </x-field>
                     <x-toggle name="remember" label="Keep Me Signed In" />
+                    <x-captcha surface="account_login" />
                     <x-button type="submit" size="lg" class="w-full justify-center">Sign In</x-button>
                 </form>
             </x-card>

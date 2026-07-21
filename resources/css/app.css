@@ -245,11 +245,13 @@
         border-color: var(--color-shop-line);
     }
     /* Product card media box: fixed square ratio so a grid of mixed-aspect
-       uploads still lines up. */
+       uploads still lines up. A hairline border frames every image so a
+       light product photo does not bleed into the page background. */
     .shop-media {
         aspect-ratio: 1 / 1;
         background: #f5f5f4;
         overflow: hidden;
+        border: 1px solid var(--color-shop-line);
     }
     .shop-media img {
         width: 100%;

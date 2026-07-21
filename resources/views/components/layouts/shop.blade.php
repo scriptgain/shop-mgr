@@ -32,12 +32,20 @@
                 <p class="truncate text-slate-400">{{ config('shop.store_tagline') }}</p>
                 <div class="flex items-center gap-4 shrink-0">
                     @if ($currentCustomer)
-                        <a href="{{ route('shop.account') }}" class="hover:text-white transition truncate max-w-[10rem]">Hi, {{ $currentCustomer->first_name }}</a>
+                        <a href="{{ route('shop.account') }}" class="inline-flex items-center gap-1.5 hover:text-white transition truncate max-w-[10rem]">
+                            <x-icon name="user" class="w-3.5 h-3.5 shrink-0" /> Hi, {{ $currentCustomer->first_name }}
+                        </a>
                     @else
-                        <a href="{{ route('shop.account.login') }}" class="hover:text-white transition">Sign In</a>
-                        <a href="{{ route('shop.account.register') }}" class="hidden sm:inline hover:text-white transition">Create Account</a>
+                        <a href="{{ route('shop.account.login') }}" class="inline-flex items-center gap-1.5 hover:text-white transition">
+                            <x-icon name="user" class="w-3.5 h-3.5 shrink-0" /> Sign In
+                        </a>
+                        <a href="{{ route('shop.account.register') }}" class="hidden sm:inline-flex items-center gap-1.5 hover:text-white transition">
+                            <x-icon name="plus" class="w-3.5 h-3.5 shrink-0" /> Create Account
+                        </a>
                     @endif
-                    <a href="{{ route('shop.cart') }}" class="hover:text-white transition">Cart ({{ $cartCount }})</a>
+                    <a href="{{ route('shop.cart') }}" class="inline-flex items-center gap-1.5 hover:text-white transition">
+                        <x-icon name="bag" class="w-3.5 h-3.5 shrink-0" /> Cart ({{ $cartCount }})
+                    </a>
                 </div>
             </div>
         </div>
@@ -65,9 +73,13 @@
                         @endif
                     </a>
                     <nav class="hidden lg:flex items-center gap-1 ml-4">
-                        <a href="{{ route('shop.catalog') }}" class="px-3 py-2 rounded-lg text-sm font-medium text-shop-ink/80 hover:text-shop-ink hover:bg-slate-100 transition">All Products</a>
+                        <a href="{{ route('shop.catalog') }}" class="group inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-shop-ink/80 hover:text-shop-ink hover:bg-slate-100 transition">
+                            <x-icon name="box" class="w-4 h-4 shrink-0 text-shop-muted group-hover:text-brand-600 transition-colors" /> All Products
+                        </a>
                         @foreach ($navCollections as $navCollection)
-                            <a href="{{ route('shop.collection', $navCollection) }}" class="px-3 py-2 rounded-lg text-sm font-medium text-shop-ink/80 hover:text-shop-ink hover:bg-slate-100 transition">{{ $navCollection->name }}</a>
+                            <a href="{{ route('shop.collection', $navCollection) }}" class="group inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-shop-ink/80 hover:text-shop-ink hover:bg-slate-100 transition">
+                                <x-icon name="tag" class="w-4 h-4 shrink-0 text-shop-muted group-hover:text-brand-600 transition-colors" /> {{ $navCollection->name }}
+                            </a>
                         @endforeach
                     </nav>
                 </div>
@@ -78,7 +90,7 @@
                             <span class="sr-only">Search Products</span>
                             <x-icon name="search" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-shop-muted" />
                             <input type="search" name="q" value="{{ request('q') }}" placeholder="Search Products"
-                                class="w-48 lg:w-64 rounded-full border-0 bg-slate-100 pl-9 pr-4 py-2 text-sm text-shop-ink placeholder:text-shop-muted focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
+                                class="w-48 lg:w-64 rounded-full border border-slate-300 bg-white pl-9 pr-4 py-2 text-sm text-shop-ink placeholder:text-shop-muted focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 transition">
                         </label>
                     </form>
                     <a href="{{ route('shop.search') }}" class="md:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg text-shop-ink hover:bg-slate-100 transition" aria-label="Search">
@@ -107,7 +119,7 @@
                         <span class="sr-only">Search Products</span>
                         <x-icon name="search" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-shop-muted" />
                         <input type="search" name="q" value="{{ request('q') }}" placeholder="Search Products"
-                            class="w-full rounded-full border-0 bg-slate-100 pl-9 pr-4 py-2 text-sm text-shop-ink placeholder:text-shop-muted focus:ring-2 focus:ring-brand-500">
+                            class="w-full rounded-full border border-slate-300 bg-white pl-9 pr-4 py-2 text-sm text-shop-ink placeholder:text-shop-muted focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30">
                     </label>
                 </form>
                 <a href="{{ route('shop.catalog') }}" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-shop-ink hover:bg-slate-100 transition">All Products</a>
@@ -145,25 +157,87 @@
 
     {{-- Footer --}}
     <footer class="border-t shop-hairline bg-white">
-        <div class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                <div>
-                    <p class="text-lg font-semibold text-shop-ink">{{ $storeName }}</p>
-                    <p class="mt-2 text-sm text-shop-muted leading-relaxed">{{ config('shop.store_tagline') }}</p>
+        {{-- Trust strip: the reassurances that get a cart over the line. --}}
+        <div class="border-b shop-hairline bg-slate-50">
+            <div class="{{ $maxWidth }} mx-auto grid grid-cols-2 gap-px px-4 sm:px-6 lg:px-8 lg:grid-cols-4">
+                <div class="flex items-center gap-3 py-5 lg:px-4">
+                    <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-brand-600 ring-1 ring-inset ring-brand-200">
+                        <x-icon name="truck" class="w-5 h-5" />
+                    </span>
+                    <span class="min-w-0">
+                        <span class="block text-sm font-semibold text-shop-ink">Free Shipping</span>
+                        <span class="block text-xs text-shop-muted">On Orders Over $75</span>
+                    </span>
                 </div>
-                <div>
+                <div class="flex items-center gap-3 py-5 lg:px-4">
+                    <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-brand-600 ring-1 ring-inset ring-brand-200">
+                        <x-icon name="refresh" class="w-5 h-5" />
+                    </span>
+                    <span class="min-w-0">
+                        <span class="block text-sm font-semibold text-shop-ink">Easy Returns</span>
+                        <span class="block text-xs text-shop-muted">30 Days, No Fuss</span>
+                    </span>
+                </div>
+                <div class="flex items-center gap-3 py-5 lg:px-4">
+                    <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-brand-600 ring-1 ring-inset ring-brand-200">
+                        <x-icon name="lock" class="w-5 h-5" />
+                    </span>
+                    <span class="min-w-0">
+                        <span class="block text-sm font-semibold text-shop-ink">Secure Checkout</span>
+                        <span class="block text-xs text-shop-muted">Encrypted Payments</span>
+                    </span>
+                </div>
+                <div class="flex items-center gap-3 py-5 lg:px-4">
+                    <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-brand-600 ring-1 ring-inset ring-brand-200">
+                        <x-icon name="shield" class="w-5 h-5" />
+                    </span>
+                    <span class="min-w-0">
+                        <span class="block text-sm font-semibold text-shop-ink">Two-Year Guarantee</span>
+                        <span class="block text-xs text-shop-muted">On Everything We Sell</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 gap-10 lg:grid-cols-12">
+                {{-- Brand + newsletter, the widest column --}}
+                <div class="min-w-0 lg:col-span-4">
+                    <a href="{{ route('shop.home') }}" class="inline-flex items-center gap-2">
+                        <x-icon name="bag" class="w-6 h-6 shrink-0 text-brand-600" />
+                        <span class="text-lg font-semibold tracking-tight text-shop-ink">{{ $storeName }}</span>
+                    </a>
+                    <p class="mt-3 max-w-sm text-sm leading-relaxed text-shop-muted">{{ config('shop.store_tagline') }}</p>
+
+                    <p class="mt-6 text-sm font-semibold text-shop-ink">Get 10% Off Your First Order</p>
+                    <form action="{{ route('shop.search') }}" method="GET" class="mt-3 flex max-w-sm gap-2">
+                        <label for="footer-news" class="sr-only">Email Address</label>
+                        <div class="relative flex-1">
+                            <x-icon name="envelope" class="pointer-events-none absolute left-3 top-1/2 w-4 h-4 -translate-y-1/2 text-shop-muted" />
+                            <input id="footer-news" type="email" name="email" placeholder="Email Address"
+                                   class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-9 pr-3 text-sm text-shop-ink placeholder:text-shop-muted focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 transition">
+                        </div>
+                        <button type="submit" class="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700">
+                            Subscribe
+                        </button>
+                    </form>
+                </div>
+
+                <div class="min-w-0 lg:col-span-2">
                     <p class="text-sm font-semibold text-shop-ink">Shop</p>
-                    <ul class="mt-3 space-y-2 text-sm text-shop-muted">
+                    <ul class="mt-4 space-y-2.5 text-sm text-shop-muted">
                         <li><a href="{{ route('shop.catalog') }}" class="hover:text-shop-ink transition">All Products</a></li>
                         <li><a href="{{ route('shop.collections') }}" class="hover:text-shop-ink transition">Collections</a></li>
-                        <li><a href="{{ route('shop.cart') }}" class="hover:text-shop-ink transition">Cart</a></li>
+                        <li><a href="{{ route('shop.cart') }}" class="hover:text-shop-ink transition">Your Cart</a></li>
                     </ul>
                 </div>
-                <div>
+
+                <div class="min-w-0 lg:col-span-2">
                     <p class="text-sm font-semibold text-shop-ink">Account</p>
-                    <ul class="mt-3 space-y-2 text-sm text-shop-muted">
+                    <ul class="mt-4 space-y-2.5 text-sm text-shop-muted">
                         @if ($currentCustomer)
                             <li><a href="{{ route('shop.account') }}" class="hover:text-shop-ink transition">My Account</a></li>
+                            <li><a href="{{ route('shop.account') }}" class="hover:text-shop-ink transition">Order History</a></li>
                             <li><a href="{{ route('shop.account.addresses') }}" class="hover:text-shop-ink transition">Addresses</a></li>
                         @else
                             <li><a href="{{ route('shop.account.login') }}" class="hover:text-shop-ink transition">Sign In</a></li>
@@ -171,23 +245,33 @@
                         @endif
                     </ul>
                 </div>
-                <div>
-                    <p class="text-sm font-semibold text-shop-ink">Contact</p>
-                    <ul class="mt-3 space-y-2 text-sm text-shop-muted">
+
+                <div class="min-w-0 lg:col-span-4">
+                    <p class="text-sm font-semibold text-shop-ink">Help</p>
+                    <ul class="mt-4 space-y-2.5 text-sm text-shop-muted">
                         @if (config('shop.store_email'))
-                            <li><a href="mailto:{{ config('shop.store_email') }}" class="hover:text-shop-ink transition">{{ config('shop.store_email') }}</a></li>
+                            <li><a href="mailto:{{ config('shop.store_email') }}" class="inline-flex items-center gap-2 hover:text-shop-ink transition"><x-icon name="envelope" class="w-4 h-4 shrink-0 text-shop-muted" /> {{ config('shop.store_email') }}</a></li>
                         @endif
                         @if (config('shop.store_phone'))
-                            <li>{{ config('shop.store_phone') }}</li>
+                            <li class="inline-flex items-center gap-2"><x-icon name="bell" class="w-4 h-4 shrink-0 text-shop-muted" /> {{ config('shop.store_phone') }}</li>
                         @endif
                         @if (config('shop.store_address'))
-                            <li>{{ config('shop.store_address') }}</li>
+                            <li class="inline-flex items-center gap-2"><x-icon name="home" class="w-4 h-4 shrink-0 text-shop-muted" /> {{ config('shop.store_address') }}</li>
                         @endif
                     </ul>
                 </div>
             </div>
-            <div class="mt-10 pt-6 border-t shop-hairline flex flex-wrap items-center justify-between gap-2 text-xs text-shop-muted">
-                <span>&copy; {{ date('Y') }} {{ $storeName }}. All Rights Reserved.</span>
+
+            <div class="mt-10 flex flex-col gap-4 border-t shop-hairline pt-6 sm:flex-row sm:items-center sm:justify-between">
+                <span class="text-xs text-shop-muted">&copy; {{ date('Y') }} {{ $storeName }}. All Rights Reserved.</span>
+                {{-- Payment method chips: the "you can pay" reassurance carts expect. --}}
+                <div class="flex flex-wrap items-center gap-2" aria-label="Accepted Payment Methods">
+                    @foreach (['Visa', 'Mastercard', 'Amex', 'Discover', 'PayPal'] as $method)
+                        <span class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-shop-muted">
+                            <x-icon name="credit-card" class="w-3.5 h-3.5 shrink-0" /> {{ $method }}
+                        </span>
+                    @endforeach
+                </div>
             </div>
         </div>
     </footer>

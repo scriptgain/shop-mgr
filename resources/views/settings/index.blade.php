@@ -10,6 +10,7 @@
                 ['Storefront', 'Store identity, catalog behaviour, checkout policy, and tax mode.', 'bag', 'settings.storefront.edit', false],
                 ['Payments', 'Gateways and their credentials.', 'credit-card', 'settings.payments.edit', false],
                 ['SEO', 'Indexing, titles, link previews, sitemap, and robots.', 'globe', 'settings.seo.edit', false],
+                ['Spam Protection', 'Anti-spam provider, honeypot, and per-form challenges.', 'shield', 'settings.spam.edit', false],
                 ['Shipping', 'Zones and the rates offered inside them.', 'truck', 'shipping.index', false],
                 ['Tax', 'Regional tax rules applied at checkout.', 'percent', 'taxes.index', false],
             ],

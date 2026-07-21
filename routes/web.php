@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PaymentSettingsController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ShippingController;
+use App\Http\Controllers\Admin\SpamProtectionController;
 use App\Http\Controllers\Admin\StorefrontSettingsController;
 use App\Http\Controllers\Admin\TaxController;
 use App\Http\Controllers\Admin\TemplateController;
@@ -57,7 +58,7 @@ Route::prefix('setup')->group(function () {
 // Staff auth.
 Route::middleware('guest')->group(function () {
     Route::get('/admin/login', [AuthController::class, 'show'])->name('login');
-    Route::post('/admin/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
+    Route::post('/admin/login', [AuthController::class, 'login'])->middleware(['throttle:10,1', 'captcha:admin_login']);
     // Developer quick login. The action 404s unless the request IP matches
     // the dev_login_ip setting, so this route is gated, not just hidden.
     Route::post('/admin/dev-login', [AuthController::class, 'devLogin'])->name('dev-login')->middleware('throttle:10,1');
@@ -114,7 +115,7 @@ Route::name('shop.')->group(function () {
     // Checkout.
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout');
     Route::post('/checkout/quote', [CheckoutController::class, 'quote'])->name('checkout.quote');
-    Route::post('/checkout', [CheckoutController::class, 'place'])->middleware('throttle:20,1')->name('checkout.place');
+    Route::post('/checkout', [CheckoutController::class, 'place'])->middleware(['throttle:20,1', 'captcha:checkout'])->name('checkout.place');
     /*
      * Card step. Signed so a guest returns to their OWN payment page after a
      * 3D Secure bounce without needing an account, while the order number in
@@ -146,9 +147,9 @@ Route::name('shop.')->group(function () {
     // Customer accounts (the 'customer' guard, never the staff one).
     Route::middleware('guest:customer')->group(function () {
         Route::get('/account/login', [AccountController::class, 'showLogin'])->name('account.login');
-        Route::post('/account/login', [AccountController::class, 'login'])->middleware('throttle:10,1');
+        Route::post('/account/login', [AccountController::class, 'login'])->middleware(['throttle:10,1', 'captcha:account_login']);
         Route::get('/account/register', [AccountController::class, 'showRegister'])->name('account.register');
-        Route::post('/account/register', [AccountController::class, 'register'])->middleware('throttle:10,1');
+        Route::post('/account/register', [AccountController::class, 'register'])->middleware(['throttle:10,1', 'captcha:account_register']);
     });
     Route::middleware('auth:customer')->group(function () {
         Route::get('/account', [AccountController::class, 'index'])->name('account');
@@ -263,6 +264,9 @@ Route::prefix('admin')->middleware(['auth', 'security.policy'])->group(function 
     Route::post('settings/payments/test', [PaymentSettingsController::class, 'test'])->name('settings.payments.test');
     Route::get('settings/seo', [\App\Http\Controllers\Admin\SeoSettingsController::class, 'edit'])->name('settings.seo.edit');
     Route::put('settings/seo', [\App\Http\Controllers\Admin\SeoSettingsController::class, 'update'])->name('settings.seo.update');
+    Route::get('settings/spam', [SpamProtectionController::class, 'edit'])->name('settings.spam.edit');
+    Route::put('settings/spam', [SpamProtectionController::class, 'update'])->name('settings.spam.update');
+    Route::post('settings/spam/test', [SpamProtectionController::class, 'test'])->name('settings.spam.test');
 
     /* ---- Settings: inherited -MGR scaffold ---- */
     Route::get('settings/tokens', [ApiTokenController::class, 'index'])->name('settings.tokens.index');

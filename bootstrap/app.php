@@ -35,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'security.policy' => \App\Http\Middleware\EnforceSecurityPolicy::class,
             'firewall' => \App\Http\Middleware\FirewallGuard::class,
             'setup' => \App\Http\Middleware\EnsureSetup::class,
+            'captcha' => \App\Http\Middleware\EnsureCaptcha::class,
         ]);
         // Perimeter guard on every web request: IP bans + optional allowlist.
         $middleware->web(append: [

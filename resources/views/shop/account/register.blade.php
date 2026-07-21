@@ -26,6 +26,7 @@
                         <x-input type="password" id="password_confirmation" name="password_confirmation" required autocomplete="new-password" />
                     </x-field>
                     <x-check-switch name="accepts_marketing" value="1">Email Me About New Arrivals And Offers</x-check-switch>
+                    <x-captcha surface="account_register" />
                     <x-button type="submit" size="lg" class="w-full justify-center">Create Account</x-button>
                 </form>
             </x-card>

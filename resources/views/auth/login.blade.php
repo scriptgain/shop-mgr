@@ -51,6 +51,8 @@
 
                 <x-toggle name="remember" label="Remember Me" />
 
+                <x-captcha surface="admin_login" />
+
                 <x-button type="submit" class="w-full">Sign In</x-button>
             </form>
             @isset($devLoginUser)

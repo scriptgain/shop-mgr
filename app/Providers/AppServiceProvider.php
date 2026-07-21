@@ -23,6 +23,12 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Services\SeoService::class);
         $this->app->singleton(\App\Services\SeoUrlService::class);
         $this->app->singleton(\App\Services\StructuredDataService::class);
+
+        // Spam protection: one manager per request so the honeypot token issued
+        // by the <x-captcha> component and the check done by the captcha
+        // middleware share the same instance.
+        $this->app->singleton(\App\Services\Captcha\Honeypot::class);
+        $this->app->singleton(\App\Services\Captcha\CaptchaManager::class);
     }
 
     public function boot(): void

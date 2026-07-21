@@ -269,6 +269,8 @@
                         <p class="mt-4 text-sm text-rose-600" x-text="discountError"></p>
                     </template>
 
+                    <div class="mt-5"><x-captcha surface="checkout" /></div>
+
                     <x-slot:footer>
                         <x-button type="submit" size="lg" class="w-full justify-center" x-bind:disabled="quoting">Place Order</x-button>
                     </x-slot:footer>
