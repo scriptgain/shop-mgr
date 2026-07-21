@@ -16,8 +16,8 @@
          leaving the dashboard chart blank and the product variant editor with
          no rows at all. --}}
     <script defer src="{{ asset_v('js/shop-admin.js') }}"></script>
-    <x-tailwind-cdn />
-    <x-accent-style />
+    <x-tailwind-cdn :apply-theme="false" />
+    <x-accent-style :apply-theme="false" />
 </head>
 <body class="h-full min-h-full bg-slate-50">
 <x-demo-banner />

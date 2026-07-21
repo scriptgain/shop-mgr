@@ -25,15 +25,28 @@ class TailwindCdn extends Component
 {
     public string $tokens;
 
-    public function __construct(ThemeService $themes)
+    /**
+     * @param  bool  $applyTheme  Whether the merchant's active THEME (colours,
+     *   radius, spacing, type scale) is applied. The storefront passes true;
+     *   the merchant admin passes false, so a merchant theming their shopfront
+     *   does not also restyle the tools they work in all day. Both layouts
+     *   still get the shipped brand accent via the legacy block.
+     */
+    public function __construct(bool $applyTheme = true)
     {
+        // Resolve the service inside the constructor rather than injecting it,
+        // so $applyTheme is the sole constructor parameter. Mixing an injected
+        // dependency with a data attribute misbinds the attribute, which left
+        // the admin still picking up the storefront theme.
+        $themes = app(ThemeService::class);
+
         $css = (string) (@file_get_contents(resource_path('css/app.css')) ?: '');
 
         // Drop @import "tailwindcss"; and @source globs: the browser build
         // supplies Tailwind itself and scans the live DOM for classes.
         $css = (string) preg_replace('/^[ \t]*@(?:import|source)\b[^;]*;[ \t]*\R?/m', '', $css);
 
-        $theme = $themes->active();
+        $theme = $applyTheme ? $themes->active() : null;
 
         if (! $theme) {
             $css .= $this->legacyAccentBlock($themes);

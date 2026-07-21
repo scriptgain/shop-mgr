@@ -17,9 +17,16 @@ class AccentStyle extends Component
 {
     public string $css;
 
-    public function __construct(ThemeService $themes)
+    /**
+     * @param  bool  $applyTheme  Whether the merchant's active theme is applied.
+     *   Storefront true; admin false, so theming the shopfront does not restyle
+     *   the admin. Matches TailwindCdn, which is the other theme injection path.
+     */
+    public function __construct(bool $applyTheme = true)
     {
-        $theme = $themes->active();
+        $themes = app(ThemeService::class);
+
+        $theme = $applyTheme ? $themes->active() : null;
 
         if ($theme) {
             $this->css = $themes->rootVars($theme);
