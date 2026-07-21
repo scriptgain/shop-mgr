@@ -55,23 +55,34 @@
 
                 <x-button type="submit" class="w-full">Sign In</x-button>
             </form>
-            @isset($devLoginUser)
-                @if ($devLoginUser)
-                    {{-- Only rendered when the request IP matches the dev_login_ip
-                         setting. The endpoint enforces the same check, so this is
-                         a convenience, not the security boundary. --}}
-                    <div class="mt-6 section-divider pt-6">
-                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Developer Access</p>
-                        <form method="POST" action="{{ route('dev-login') }}" class="mt-3">
-                            @csrf
-                            <x-button type="submit" variant="secondary" class="w-full">
-                                Sign In As {{ $devLoginUser->name }}
-                            </x-button>
-                        </form>
-                        <p class="mt-2 text-xs text-slate-500">Visible only from your allowlisted IP address.</p>
+            @if (($devLoginUser ?? null) || ! empty($demoStaff ?? []))
+                {{-- Only rendered when the request IP matches the dev_login_ip
+                     setting. Every endpoint enforces the same check, so this is
+                     a convenience, not the security boundary. --}}
+                <div class="mt-6 section-divider pt-6">
+                    <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Demo Logins</p>
+                    <div class="mt-3 space-y-2">
+                        @if ($devLoginUser ?? null)
+                            <form method="POST" action="{{ route('dev-login') }}">
+                                @csrf
+                                <x-button type="submit" variant="secondary" icon="user" class="w-full !justify-start">
+                                    Sign In As {{ $devLoginUser->name }}
+                                </x-button>
+                            </form>
+                        @endif
+                        @foreach ($demoStaff ?? [] as $persona)
+                            <form method="POST" action="{{ route('demo-login.staff', $persona['key']) }}">
+                                @csrf
+                                <x-button type="submit" variant="secondary" icon="user" class="w-full !justify-start">
+                                    <span class="flex-1 text-left">{{ $persona['label'] }}</span>
+                                    <span class="text-xs font-normal text-slate-400 ring-1 ring-inset ring-slate-200 rounded-full px-2 py-0.5">{{ $persona['note'] }}</span>
+                                </x-button>
+                            </form>
+                        @endforeach
                     </div>
-                @endif
-            @endisset
+                    <p class="mt-2 text-xs text-slate-500">Visible only from your allowlisted IP address.</p>
+                </div>
+            @endif
 
         </div>
     </div>

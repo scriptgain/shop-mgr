@@ -14,7 +14,31 @@ class AuthController extends Controller
     {
         return view('auth.login', [
             'devLoginUser' => self::devLoginUser($request),
+            // Staff persona buttons, populated only from the allowlisted IP.
+            'demoStaff' => \App\Support\DemoPersonas::staffFor($request),
         ]);
+    }
+
+    /**
+     * One-click sign-in as a seeded staff persona (Merchant Admin / Staff).
+     *
+     * Same trust model as devLogin(): the IP is re-checked here, so this 404s
+     * from anywhere but the allowlisted address, and it bypasses the captcha
+     * that protects the password form. No captcha middleware is attached to the
+     * route, matching the developer quick login.
+     */
+    public function demoLoginStaff(Request $request, string $persona)
+    {
+        abort_unless(\App\Support\DemoPersonas::allowed($request), 404);
+
+        $user = \App\Support\DemoPersonas::resolveStaff($persona);
+        abort_if($user === null, 404);
+
+        Auth::login($user);
+        $request->session()->regenerate();
+        \App\Models\AuditLog::record('login', 'Signed in as demo persona "'.$user->name.'" from '.$request->ip());
+
+        return redirect()->intended(route('dashboard'));
     }
 
     /**

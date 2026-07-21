@@ -62,6 +62,11 @@ Route::middleware('guest')->group(function () {
     // Developer quick login. The action 404s unless the request IP matches
     // the dev_login_ip setting, so this route is gated, not just hidden.
     Route::post('/admin/dev-login', [AuthController::class, 'devLogin'])->name('dev-login')->middleware('throttle:10,1');
+    // Staff demo personas (Merchant Admin / Staff). IP-gated inside the action
+    // and captcha-free, exactly like dev-login: a POST from any other address
+    // 404s.
+    Route::post('/admin/demo-login/{persona}', [AuthController::class, 'demoLoginStaff'])
+        ->name('demo-login.staff')->middleware('throttle:10,1');
 });
 Route::get('/magic/{user}', [AuthController::class, 'magic'])->name('magic-login')->middleware('signed');
 Route::get('/2fa', [AuthController::class, 'challenge'])->name('2fa.challenge');
@@ -150,6 +155,10 @@ Route::name('shop.')->group(function () {
         Route::post('/account/login', [AccountController::class, 'login'])->middleware(['throttle:10,1', 'captcha:account_login']);
         Route::get('/account/register', [AccountController::class, 'showRegister'])->name('account.register');
         Route::post('/account/register', [AccountController::class, 'register'])->middleware(['throttle:10,1', 'captcha:account_register']);
+        // Customer demo personas. IP-gated inside the action and captcha-free,
+        // the storefront twin of the admin dev-login.
+        Route::post('/account/demo-login/{persona}', [AccountController::class, 'demoLogin'])
+            ->name('account.demo-login')->middleware('throttle:10,1');
     });
     Route::middleware('auth:customer')->group(function () {
         Route::get('/account', [AccountController::class, 'index'])->name('account');

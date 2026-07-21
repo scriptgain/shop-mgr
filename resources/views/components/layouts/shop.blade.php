@@ -32,18 +32,18 @@
                 <p class="truncate text-slate-400">{{ config('shop.store_tagline') }}</p>
                 <div class="flex items-center gap-4 shrink-0">
                     @if ($currentCustomer)
-                        <a href="{{ route('shop.account') }}" class="inline-flex items-center gap-1.5 hover:text-white transition truncate max-w-[10rem]">
+                        <a href="{{ route('shop.account') }}" class="inline-flex items-center gap-1.5 rounded px-2 py-0.5 ring-1 ring-transparent hover:text-white hover:ring-white/30 transition truncate max-w-[10rem]">
                             <x-icon name="user" class="w-3.5 h-3.5 shrink-0" /> Hi, {{ $currentCustomer->first_name }}
                         </a>
                     @else
-                        <a href="{{ route('shop.account.login') }}" class="inline-flex items-center gap-1.5 hover:text-white transition">
+                        <a href="{{ route('shop.account.login') }}" class="inline-flex items-center gap-1.5 rounded px-2 py-0.5 ring-1 ring-transparent hover:text-white hover:ring-white/30 transition">
                             <x-icon name="user" class="w-3.5 h-3.5 shrink-0" /> Sign In
                         </a>
-                        <a href="{{ route('shop.account.register') }}" class="hidden sm:inline-flex items-center gap-1.5 hover:text-white transition">
+                        <a href="{{ route('shop.account.register') }}" class="hidden sm:inline-flex items-center gap-1.5 rounded px-2 py-0.5 ring-1 ring-transparent hover:text-white hover:ring-white/30 transition">
                             <x-icon name="plus" class="w-3.5 h-3.5 shrink-0" /> Create Account
                         </a>
                     @endif
-                    <a href="{{ route('shop.cart') }}" class="inline-flex items-center gap-1.5 hover:text-white transition">
+                    <a href="{{ route('shop.cart') }}" class="inline-flex items-center gap-1.5 rounded px-2 py-0.5 ring-1 ring-transparent hover:text-white hover:ring-white/30 transition">
                         <x-icon name="bag" class="w-3.5 h-3.5 shrink-0" /> Cart ({{ $cartCount }})
                     </a>
                 </div>
@@ -160,7 +160,7 @@
         {{-- Trust strip: the reassurances that get a cart over the line. --}}
         <div class="border-b shop-hairline bg-slate-50">
             <div class="{{ $maxWidth }} mx-auto grid grid-cols-2 gap-px px-4 sm:px-6 lg:px-8 lg:grid-cols-4">
-                <div class="flex items-center gap-3 py-5 lg:px-4">
+                <div class="flex items-center gap-3 py-5 lg:px-4 lg:first:pl-0 lg:last:pr-0">
                     <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-brand-600 ring-1 ring-inset ring-brand-200">
                         <x-icon name="truck" class="w-5 h-5" />
                     </span>
@@ -169,7 +169,7 @@
                         <span class="block text-xs text-shop-muted">On Orders Over $75</span>
                     </span>
                 </div>
-                <div class="flex items-center gap-3 py-5 lg:px-4">
+                <div class="flex items-center gap-3 py-5 lg:px-4 lg:first:pl-0 lg:last:pr-0">
                     <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-brand-600 ring-1 ring-inset ring-brand-200">
                         <x-icon name="refresh" class="w-5 h-5" />
                     </span>
@@ -178,7 +178,7 @@
                         <span class="block text-xs text-shop-muted">30 Days, No Fuss</span>
                     </span>
                 </div>
-                <div class="flex items-center gap-3 py-5 lg:px-4">
+                <div class="flex items-center gap-3 py-5 lg:px-4 lg:first:pl-0 lg:last:pr-0">
                     <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-brand-600 ring-1 ring-inset ring-brand-200">
                         <x-icon name="lock" class="w-5 h-5" />
                     </span>
@@ -187,7 +187,7 @@
                         <span class="block text-xs text-shop-muted">Encrypted Payments</span>
                     </span>
                 </div>
-                <div class="flex items-center gap-3 py-5 lg:px-4">
+                <div class="flex items-center gap-3 py-5 lg:px-4 lg:first:pl-0 lg:last:pr-0">
                     <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-brand-600 ring-1 ring-inset ring-brand-200">
                         <x-icon name="shield" class="w-5 h-5" />
                     </span>

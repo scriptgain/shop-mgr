@@ -17,9 +17,34 @@ use Illuminate\Validation\ValidationException;
  */
 class AccountController extends Controller
 {
-    public function showLogin()
+    public function showLogin(Request $request)
     {
-        return view('shop.account.login');
+        return view('shop.account.login', [
+            // Customer persona buttons, populated only from the allowlisted IP.
+            'demoCustomers' => \App\Support\DemoPersonas::customersFor($request),
+        ]);
+    }
+
+    /**
+     * One-click sign-in as a seeded customer persona, so the account and order
+     * history pages can be walked without typing credentials.
+     *
+     * IP-gated the same way as the admin developer login: the check is enforced
+     * here, not just in the button's visibility, so this 404s from any other
+     * address. The route carries no captcha middleware, so it bypasses the
+     * shop's login captcha as a trusted shortcut.
+     */
+    public function demoLogin(Request $request, string $persona)
+    {
+        abort_unless(\App\Support\DemoPersonas::allowed($request), 404);
+
+        $customer = \App\Support\DemoPersonas::resolveCustomer($persona);
+        abort_if($customer === null, 404);
+
+        Auth::guard('customer')->login($customer);
+        $request->session()->regenerate();
+
+        return redirect()->intended(route('shop.account'));
     }
 
     public function login(Request $request)
