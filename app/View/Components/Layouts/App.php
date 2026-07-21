@@ -102,6 +102,17 @@ class App extends Component
             ],
             [
                 'type' => 'group',
+                'label' => 'Help Center',
+                'icon' => 'book',
+                'active' => request()->routeIs('help-categories.*', 'help-articles.*', 'store-pages.*'),
+                'items' => [
+                    ['Categories', route('help-categories.index'), 'folder', request()->routeIs('help-categories.*')],
+                    ['Articles', route('help-articles.index'), 'book', request()->routeIs('help-articles.*')],
+                    ['Policy Pages', route('store-pages.index'), 'info', request()->routeIs('store-pages.*')],
+                ],
+            ],
+            [
+                'type' => 'group',
                 'label' => 'Configuration',
                 'icon' => 'truck',
                 'active' => request()->routeIs('shipping.*', 'taxes.*'),
@@ -143,6 +154,9 @@ class App extends Component
             'discounts' => ['Discounts', 'discounts.index'],
             'themes' => ['Themes', 'themes.index'],
             'templates' => ['Templates', 'templates.index'],
+            'help-categories' => ['Help Categories', 'help-categories.index'],
+            'help-articles' => ['Help Articles', 'help-articles.index'],
+            'store-pages' => ['Policy Pages', 'store-pages.index'],
             'shipping' => ['Shipping', 'shipping.index'],
             'taxes' => ['Tax', 'taxes.index'],
             'settings' => ['Settings', 'settings.index'],

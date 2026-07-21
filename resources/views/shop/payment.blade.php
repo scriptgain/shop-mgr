@@ -5,7 +5,7 @@
         <p class="mt-2 text-sm text-shop-muted">Order {{ $order->number }}. Your order is reserved and will be confirmed once payment completes.</p>
     </section>
 
-    <div class="section-divider shop-hairline"></div>
+    <div class="section-divider"></div>
 
     @if ($isTestMode)
         {{-- Unmistakable, not a subtle badge: a store left in test mode by
@@ -109,14 +109,14 @@
                         @endforeach
                     </ul>
 
-                    <dl class="space-y-3 text-sm border-t shop-hairline pt-4">
+                    <dl class="space-y-3 text-sm border-t border-shop-line pt-4">
                         <div class="flex justify-between"><dt class="text-shop-muted">Subtotal</dt><dd class="tabular text-shop-ink">{{ $order->subtotal_formatted }}</dd></div>
                         @if ($order->discount_cents > 0)
                             <div class="flex justify-between"><dt class="text-shop-muted">Discount</dt><dd class="tabular text-emerald-600">-{{ $order->discount_formatted }}</dd></div>
                         @endif
                         <div class="flex justify-between"><dt class="text-shop-muted">Shipping</dt><dd class="tabular text-shop-ink">{{ $order->shipping_formatted }}</dd></div>
                         <div class="flex justify-between"><dt class="text-shop-muted">Tax</dt><dd class="tabular text-shop-ink">{{ $order->tax_formatted }}</dd></div>
-                        <div class="pt-3 border-t shop-hairline flex justify-between text-base font-semibold">
+                        <div class="pt-3 border-t border-shop-line flex justify-between text-base font-semibold">
                             <dt class="text-shop-ink">Total</dt><dd class="tabular text-shop-ink">{{ $order->total_formatted }}</dd>
                         </div>
                     </dl>

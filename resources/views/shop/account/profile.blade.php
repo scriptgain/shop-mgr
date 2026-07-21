@@ -6,7 +6,7 @@
     </section>
 
     <section class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between gap-4 border-b shop-hairline mb-8">
+        <div class="flex items-center justify-between gap-4 border-b border-shop-line mb-8">
             <div class="flex items-center gap-1 overflow-x-auto no-scrollbar">
                 @foreach ([['Orders', 'shop.account', 'bag'], ['Profile', 'shop.account.profile', 'user'], ['Addresses', 'shop.account.addresses', 'home']] as [$label, $routeName, $icon])
                     @php $active = request()->routeIs($routeName); @endphp
@@ -25,7 +25,7 @@
     </section>
 
     <section class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div class="max-w-xl">
+        <div>
             <x-card title="Profile Details">
                 <form method="POST" action="{{ route('shop.account.profile.update') }}" class="space-y-5">
                     @csrf
@@ -44,7 +44,7 @@
                     <x-field label="Phone" for="phone">
                         <x-input type="tel" id="phone" name="phone" value="{{ old('phone', $customer->phone) }}" />
                     </x-field>
-                    <div class="pt-2 border-t shop-hairline"></div>
+                    <div class="pt-2 border-t border-shop-line"></div>
                     <x-field label="New Password" for="password" hint="Leave blank to keep your current password.">
                         <x-input type="password" id="password" name="password" autocomplete="new-password" />
                     </x-field>
@@ -52,7 +52,9 @@
                         <x-input type="password" id="password_confirmation" name="password_confirmation" autocomplete="new-password" />
                     </x-field>
                     <x-check-switch name="accepts_marketing" value="1" :checked="$customer->accepts_marketing">Email Me About New Arrivals And Offers</x-check-switch>
-                    <x-button type="submit">Save Changes</x-button>
+                    <div class="flex justify-end">
+                        <x-button type="submit">Save Changes</x-button>
+                    </div>
                 </form>
             </x-card>
         </div>

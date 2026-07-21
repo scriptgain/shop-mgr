@@ -1,33 +1,40 @@
 <x-layouts.shop :title="$heading">
 
-    <section class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
-        <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-shop-ink">{{ $heading }}</h1>
-        @if ($subheading)
-            <p class="mt-2 text-shop-muted max-w-2xl">{{ $subheading }}</p>
-        @endif
-    </section>
+    {{-- Header band: a soft brand wash with an eyebrow and a large title, so a
+         category page reads as a designed landing, not a bare heading. --}}
+    <section class="relative isolate overflow-hidden border-b border-shop-line">
+        <div class="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-brand-50 via-shop-bg to-shop-bg"></div>
+        <div class="pointer-events-none absolute -right-24 -top-28 -z-10 h-80 w-80 rounded-full bg-brand-100/50 blur-3xl"></div>
 
-    {{-- Collection quick links --}}
-    @if ($collections->isNotEmpty())
-        <div class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-4">
-                <a href="{{ route('shop.catalog') }}" @class([
-                    'shrink-0 rounded-full px-4 py-2 text-sm font-medium transition ring-1 ring-inset',
-                    'bg-brand-600 text-white ring-brand-600' => ! $collection,
-                    'bg-white text-shop-ink shop-hairline hover:border-brand-400' => $collection,
-                ])>All Products</a>
-                @foreach ($collections as $navCollection)
-                    <a href="{{ route('shop.collection', $navCollection) }}" @class([
+        <div class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-8">
+            <p class="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-700 ring-1 ring-inset ring-brand-200 backdrop-blur">
+                <x-icon name="bag" class="w-3.5 h-3.5 shrink-0" /> {{ $collection ? 'Collection' : 'Shop' }}
+            </p>
+            <h1 class="mt-5 font-display text-4xl sm:text-5xl font-semibold tracking-tight text-shop-ink">{{ $heading }}</h1>
+            @if ($subheading)
+                <p class="mt-3 max-w-2xl text-lg leading-relaxed text-shop-muted">{{ $subheading }}</p>
+            @endif
+
+            {{-- Collection quick links, styled as a pill row inside the band. --}}
+            @if ($collections->isNotEmpty())
+                <div class="mt-8 flex items-center gap-2 overflow-x-auto no-scrollbar">
+                    <a href="{{ route('shop.catalog') }}" @class([
                         'shrink-0 rounded-full px-4 py-2 text-sm font-medium transition ring-1 ring-inset',
-                        'bg-brand-600 text-white ring-brand-600' => $collection && $collection->id === $navCollection->id,
-                        'bg-white text-shop-ink shop-hairline hover:border-brand-400' => ! ($collection && $collection->id === $navCollection->id),
-                    ])>{{ $navCollection->name }}</a>
-                @endforeach
-            </div>
+                        'bg-brand-600 text-white ring-brand-600 shadow-sm' => ! $collection,
+                        'bg-white/80 text-shop-ink ring-shop-line hover:ring-brand-300 hover:text-brand-700 backdrop-blur' => $collection,
+                    ])>All Products</a>
+                    @foreach ($collections as $navCollection)
+                        @php($isActive = $collection && $collection->id === $navCollection->id)
+                        <a href="{{ route('shop.collection', $navCollection) }}" @class([
+                            'shrink-0 rounded-full px-4 py-2 text-sm font-medium transition ring-1 ring-inset',
+                            'bg-brand-600 text-white ring-brand-600 shadow-sm' => $isActive,
+                            'bg-white/80 text-shop-ink ring-shop-line hover:ring-brand-300 hover:text-brand-700 backdrop-blur' => ! $isActive,
+                        ])>{{ $navCollection->name }}</a>
+                    @endforeach
+                </div>
+            @endif
         </div>
-    @endif
-
-    <div class="section-divider shop-hairline"></div>
+    </section>
 
     <section class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {{-- Toolbar: count + sort + price filter --}}

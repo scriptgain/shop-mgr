@@ -53,7 +53,7 @@
 
     {{-- Main navbar (light, sticky, separate from the utility bar). No chip/box
          behind the logo, per house style. --}}
-    <header class="bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 border-b shop-hairline sticky top-0 z-30">
+    <header class="bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 border-b border-shop-line sticky top-0 z-30">
         <div class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex h-16 items-center justify-between gap-4">
                 <div class="flex items-center gap-2 min-w-0">
@@ -73,12 +73,26 @@
                         @endif
                     </a>
                     <nav class="hidden lg:flex items-center gap-1 ml-4">
-                        <a href="{{ route('shop.catalog') }}" class="group inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-shop-ink/80 hover:text-shop-ink hover:bg-slate-100 transition">
-                            <x-icon name="box" class="w-4 h-4 shrink-0 text-shop-muted group-hover:text-brand-600 transition-colors" /> All Products
+                        @php($catalogActive = request()->routeIs('shop.catalog'))
+                        <a href="{{ route('shop.catalog') }}"
+                           @if ($catalogActive) aria-current="page" @endif
+                           @class([
+                               'group inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ring-1 transition',
+                               'bg-brand-50 text-brand-700 ring-brand-200 font-semibold' => $catalogActive,
+                               'text-shop-ink/80 ring-transparent hover:text-shop-ink hover:bg-slate-100 hover:ring-slate-200' => ! $catalogActive,
+                           ])>
+                            <x-icon name="box" @class(['w-4 h-4 shrink-0 transition-colors', 'text-brand-600' => $catalogActive, 'text-shop-muted group-hover:text-brand-600' => ! $catalogActive]) /> All Products
                         </a>
                         @foreach ($navCollections as $navCollection)
-                            <a href="{{ route('shop.collection', $navCollection) }}" class="group inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-shop-ink/80 hover:text-shop-ink hover:bg-slate-100 transition">
-                                <x-icon name="tag" class="w-4 h-4 shrink-0 text-shop-muted group-hover:text-brand-600 transition-colors" /> {{ $navCollection->name }}
+                            @php($active = url()->current() === route('shop.collection', $navCollection))
+                            <a href="{{ route('shop.collection', $navCollection) }}"
+                               @if ($active) aria-current="page" @endif
+                               @class([
+                                   'group inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ring-1 transition',
+                                   'bg-brand-50 text-brand-700 ring-brand-200 font-semibold' => $active,
+                                   'text-shop-ink/80 ring-transparent hover:text-shop-ink hover:bg-slate-100 hover:ring-slate-200' => ! $active,
+                               ])>
+                                <x-icon name="tag" @class(['w-4 h-4 shrink-0 transition-colors', 'text-brand-600' => $active, 'text-shop-muted group-hover:text-brand-600' => ! $active]) /> {{ $navCollection->name }}
                             </a>
                         @endforeach
                     </nav>
@@ -90,7 +104,7 @@
                             <span class="sr-only">Search Products</span>
                             <x-icon name="search" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-shop-muted" />
                             <input type="search" name="q" value="{{ request('q') }}" placeholder="Search Products"
-                                class="w-48 lg:w-64 rounded-full border border-slate-300 bg-white pl-9 pr-4 py-2 text-sm text-shop-ink placeholder:text-shop-muted focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 transition">
+                                class="w-48 lg:w-64 rounded-full border border-slate-200 bg-white pl-9 pr-4 py-2 text-sm text-shop-ink placeholder:text-shop-muted focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 transition">
                         </label>
                     </form>
                     <a href="{{ route('shop.search') }}" class="md:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg text-shop-ink hover:bg-slate-100 transition" aria-label="Search">
@@ -112,14 +126,14 @@
         {{-- Mobile slide-down menu. --}}
         <div x-show="mobileOpen" x-cloak
              x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
-             class="lg:hidden border-t shop-hairline bg-white shadow-sm">
+             class="lg:hidden border-t border-shop-line bg-white shadow-sm">
             <nav class="{{ $maxWidth }} mx-auto px-4 sm:px-6 py-4 space-y-1">
                 <form action="{{ route('shop.search') }}" method="GET" class="mb-3">
                     <label class="relative block">
                         <span class="sr-only">Search Products</span>
                         <x-icon name="search" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-shop-muted" />
                         <input type="search" name="q" value="{{ request('q') }}" placeholder="Search Products"
-                            class="w-full rounded-full border border-slate-300 bg-white pl-9 pr-4 py-2 text-sm text-shop-ink placeholder:text-shop-muted focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30">
+                            class="w-full rounded-full border border-slate-200 bg-white pl-9 pr-4 py-2 text-sm text-shop-ink placeholder:text-shop-muted focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30">
                     </label>
                 </form>
                 <a href="{{ route('shop.catalog') }}" class="block px-3 py-2.5 rounded-lg text-sm font-medium text-shop-ink hover:bg-slate-100 transition">All Products</a>
@@ -156,9 +170,9 @@
     </main>
 
     {{-- Footer --}}
-    <footer class="border-t shop-hairline bg-white">
+    <footer class="border-t border-shop-line bg-white">
         {{-- Trust strip: the reassurances that get a cart over the line. --}}
-        <div class="border-b shop-hairline bg-slate-50">
+        <div class="border-b border-shop-line bg-slate-50">
             <div class="{{ $maxWidth }} mx-auto grid grid-cols-2 gap-px px-4 sm:px-6 lg:px-8 lg:grid-cols-4">
                 <div class="flex items-center gap-3 py-5 lg:px-4 lg:first:pl-0 lg:last:pr-0">
                     <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-brand-600 ring-1 ring-inset ring-brand-200">
@@ -215,7 +229,7 @@
                         <div class="relative flex-1">
                             <x-icon name="envelope" class="pointer-events-none absolute left-3 top-1/2 w-4 h-4 -translate-y-1/2 text-shop-muted" />
                             <input id="footer-news" type="email" name="email" placeholder="Email Address"
-                                   class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-9 pr-3 text-sm text-shop-ink placeholder:text-shop-muted focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 transition">
+                                   class="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm text-shop-ink placeholder:text-shop-muted focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 transition">
                         </div>
                         <button type="submit" class="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700">
                             Subscribe
@@ -246,23 +260,28 @@
                     </ul>
                 </div>
 
-                <div class="min-w-0 lg:col-span-4">
+                <div class="min-w-0 lg:col-span-2">
                     <p class="text-sm font-semibold text-shop-ink">Help</p>
                     <ul class="mt-4 space-y-2.5 text-sm text-shop-muted">
+                        <li><a href="{{ route('shop.help') }}" class="hover:text-shop-ink transition">Help Center</a></li>
+                        <li><a href="{{ route('shop.page', 'shipping') }}" class="hover:text-shop-ink transition">Shipping Information</a></li>
+                        <li><a href="{{ route('shop.page', 'refund-policy') }}" class="hover:text-shop-ink transition">Refund Policy</a></li>
                         @if (config('shop.store_email'))
-                            <li><a href="mailto:{{ config('shop.store_email') }}" class="inline-flex items-center gap-2 hover:text-shop-ink transition"><x-icon name="envelope" class="w-4 h-4 shrink-0 text-shop-muted" /> {{ config('shop.store_email') }}</a></li>
+                            <li><a href="mailto:{{ config('shop.store_email') }}" class="hover:text-shop-ink transition">Contact Us</a></li>
                         @endif
-                        @if (config('shop.store_phone'))
-                            <li class="inline-flex items-center gap-2"><x-icon name="bell" class="w-4 h-4 shrink-0 text-shop-muted" /> {{ config('shop.store_phone') }}</li>
-                        @endif
-                        @if (config('shop.store_address'))
-                            <li class="inline-flex items-center gap-2"><x-icon name="home" class="w-4 h-4 shrink-0 text-shop-muted" /> {{ config('shop.store_address') }}</li>
-                        @endif
+                    </ul>
+                </div>
+
+                <div class="min-w-0 lg:col-span-2">
+                    <p class="text-sm font-semibold text-shop-ink">Legal</p>
+                    <ul class="mt-4 space-y-2.5 text-sm text-shop-muted">
+                        <li><a href="{{ route('shop.page', 'terms') }}" class="hover:text-shop-ink transition">Terms Of Service</a></li>
+                        <li><a href="{{ route('shop.page', 'privacy') }}" class="hover:text-shop-ink transition">Privacy Policy</a></li>
                     </ul>
                 </div>
             </div>
 
-            <div class="mt-10 flex flex-col gap-4 border-t shop-hairline pt-6 sm:flex-row sm:items-center sm:justify-between">
+            <div class="mt-10 flex flex-col gap-4 border-t border-shop-line pt-6 sm:flex-row sm:items-center sm:justify-between">
                 <span class="text-xs text-shop-muted">&copy; {{ date('Y') }} {{ $storeName }}. All Rights Reserved.</span>
                 {{-- Payment method chips: the "you can pay" reassurance carts expect. --}}
                 <div class="flex flex-wrap items-center gap-2" aria-label="Accepted Payment Methods">

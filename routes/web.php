@@ -109,6 +109,21 @@ Route::name('shop.')->group(function () {
     Route::get('/collections/{collection:slug}', [CatalogController::class, 'collection'])->name('collection');
     Route::get('/products/{product:slug}', [CatalogController::class, 'product'])->name('product');
 
+    /*
+     * Help Center + policy pages (merchant-managed).
+     *
+     * /help/search is declared BEFORE /help/{category:slug} so the literal
+     * segment is not swallowed by the slug parameter. The article route is
+     * scopeBindings() so {article:slug} must belong to {category:slug}.
+     */
+    Route::get('/help', [\App\Http\Controllers\Shop\HelpController::class, 'index'])->name('help');
+    Route::get('/help/search', [\App\Http\Controllers\Shop\HelpController::class, 'search'])->name('help.search');
+    Route::get('/help/{category:slug}', [\App\Http\Controllers\Shop\HelpController::class, 'category'])->name('help.category');
+    Route::get('/help/{category:slug}/{article:slug}', [\App\Http\Controllers\Shop\HelpController::class, 'article'])
+        ->scopeBindings()->name('help.article');
+
+    Route::get('/pages/{page:slug}', [\App\Http\Controllers\Shop\PageController::class, 'show'])->name('page');
+
     // Cart.
     Route::get('/cart', [CartController::class, 'show'])->name('cart');
     Route::post('/cart', [CartController::class, 'add'])->name('cart.add');
@@ -218,6 +233,14 @@ Route::prefix('admin')->middleware(['auth', 'security.policy'])->group(function 
     /* ---- Discounts ---- */
     Route::delete('discounts/bulk', [DiscountController::class, 'bulkDestroy'])->name('discounts.bulk-destroy');
     Route::resource('discounts', DiscountController::class);
+
+    /* ---- Help Center (categories + articles) and policy pages ---- */
+    Route::delete('help-categories/bulk', [\App\Http\Controllers\Admin\HelpCategoryController::class, 'bulkDestroy'])->name('help-categories.bulk-destroy');
+    Route::resource('help-categories', \App\Http\Controllers\Admin\HelpCategoryController::class)->except('show');
+    Route::delete('help-articles/bulk', [\App\Http\Controllers\Admin\HelpArticleController::class, 'bulkDestroy'])->name('help-articles.bulk-destroy');
+    Route::resource('help-articles', \App\Http\Controllers\Admin\HelpArticleController::class)->except('show');
+    Route::delete('store-pages/bulk', [\App\Http\Controllers\Admin\StorePageController::class, 'bulkDestroy'])->name('store-pages.bulk-destroy');
+    Route::resource('store-pages', \App\Http\Controllers\Admin\StorePageController::class)->except('show');
 
     /* ---- Shipping (zones + their rates) ---- */
     Route::delete('shipping/bulk', [ShippingController::class, 'bulkDestroy'])->name('shipping.bulk-destroy');

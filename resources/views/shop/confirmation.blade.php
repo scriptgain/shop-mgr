@@ -16,7 +16,7 @@
         </div>
     </section>
 
-    <div class="section-divider shop-hairline"></div>
+    <div class="section-divider"></div>
 
     <section class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
@@ -50,7 +50,7 @@
 
                 <div>
                     <h2 class="text-lg font-semibold text-shop-ink mb-4">Items</h2>
-                    <div class="divide-y shop-hairline">
+                    <div class="divide-y divide-shop-line">
                         @foreach ($order->items as $item)
                             <div class="py-4 flex items-center gap-4">
                                 <span class="shop-media w-16 h-16 rounded-lg shrink-0">
@@ -110,7 +110,7 @@
                         @endif
                         <div class="flex justify-between"><dt class="text-shop-muted">Shipping</dt><dd class="tabular text-shop-ink">{{ $order->shipping_formatted }}</dd></div>
                         <div class="flex justify-between"><dt class="text-shop-muted">Tax</dt><dd class="tabular text-shop-ink">{{ $order->tax_formatted }}</dd></div>
-                        <div class="pt-3 border-t shop-hairline flex justify-between text-base font-semibold">
+                        <div class="pt-3 border-t border-shop-line flex justify-between text-base font-semibold">
                             <dt class="text-shop-ink">Total</dt><dd class="tabular text-shop-ink">{{ $order->total_formatted }}</dd>
                         </div>
                     </dl>

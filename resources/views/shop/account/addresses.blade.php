@@ -6,7 +6,7 @@
     </section>
 
     <section class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between gap-4 border-b shop-hairline mb-8">
+        <div class="flex items-center justify-between gap-4 border-b border-shop-line mb-8">
             <div class="flex items-center gap-1 overflow-x-auto no-scrollbar">
                 @foreach ([['Orders', 'shop.account', 'bag'], ['Profile', 'shop.account.profile', 'user'], ['Addresses', 'shop.account.addresses', 'home']] as [$label, $routeName, $icon])
                     @php $active = request()->routeIs($routeName); @endphp
@@ -35,7 +35,7 @@
         @else
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 @foreach ($addresses as $address)
-                    <div class="rounded-xl ring-1 ring-inset shop-hairline p-5">
+                    <div class="rounded-xl bg-white ring-1 ring-inset ring-shop-line p-5">
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
                                 @if ($address->label)

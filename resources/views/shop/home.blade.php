@@ -1,7 +1,7 @@
 <x-layouts.shop>
 
     {{-- Hero --}}
-    <section class="relative isolate overflow-hidden border-b shop-hairline bg-white">
+    <section class="relative isolate overflow-hidden border-b border-shop-line bg-white">
         {{-- Soft brand wash, kept behind content so type stays crisp --}}
         <div class="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-brand-50 via-white to-white"></div>
         <div class="pointer-events-none absolute -right-24 -top-24 -z-10 h-96 w-96 rounded-full bg-brand-100/50 blur-3xl"></div>
@@ -25,7 +25,7 @@
                     <div class="mt-9 flex flex-wrap items-center gap-3">
                         <x-button href="{{ route('shop.catalog') }}" size="lg">Shop All Products</x-button>
                         <a href="{{ route('shop.collections') }}"
-                           class="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-semibold text-shop-ink ring-1 ring-inset shop-hairline transition hover:bg-slate-50">
+                           class="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-semibold text-shop-ink ring-1 ring-inset ring-shop-line transition hover:bg-slate-50">
                             Browse Collections
                             <x-icon name="chevron-right" class="w-4 h-4 shrink-0 text-slate-400" />
                         </a>
@@ -62,7 +62,7 @@
                     @php($heroProduct = $featured->first())
                     <div class="min-w-0 lg:col-span-5">
                         <a href="{{ route('shop.product', $heroProduct) }}"
-                           class="group block overflow-hidden rounded-2xl bg-white ring-1 shop-hairline shadow-sm transition hover:shadow-md">
+                           class="group block overflow-hidden rounded-2xl bg-white ring-1 ring-shop-line shadow-sm transition hover:shadow-md">
                             <div class="relative aspect-[4/3] overflow-hidden bg-slate-100">
                                 @if ($heroProduct->images->isNotEmpty())
                                     <img src="{{ $heroProduct->images->first()->url }}" alt="{{ $heroProduct->name }}"
@@ -98,7 +98,7 @@
         </div>
     </section>
 
-    <div class="section-divider shop-hairline"></div>
+    <div class="section-divider"></div>
 
     {{-- Featured products --}}
     @if ($featured->isNotEmpty())
@@ -119,7 +119,7 @@
             </div>
         </section>
 
-        <div class="section-divider shop-hairline"></div>
+        <div class="section-divider"></div>
     @endif
 
     {{-- Collections strip --}}
@@ -144,7 +144,7 @@
             </div>
         </section>
 
-        <div class="section-divider shop-hairline"></div>
+        <div class="section-divider"></div>
     @endif
 
     {{-- New arrivals --}}

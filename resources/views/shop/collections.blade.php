@@ -5,7 +5,7 @@
         <p class="mt-2 text-shop-muted max-w-2xl">Browse the shop by collection.</p>
     </section>
 
-    <div class="section-divider shop-hairline"></div>
+    <div class="section-divider"></div>
 
     <section class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8 py-12">
         @if ($collections->isEmpty())

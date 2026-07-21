@@ -16,7 +16,7 @@
         </div>
     </section>
 
-    <div class="section-divider shop-hairline"></div>
+    <div class="section-divider"></div>
 
     <section class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
@@ -24,9 +24,9 @@
             <div class="min-w-0 lg:col-span-2 space-y-8">
                 <div>
                     <h2 class="text-lg font-semibold text-shop-ink mb-4">Items</h2>
-                    <div class="divide-y shop-hairline">
+                    <div class="space-y-3">
                         @foreach ($order->items as $item)
-                            <div class="py-4 flex items-center gap-4">
+                            <div class="flex items-center gap-4 rounded-xl ring-1 ring-inset ring-shop-line bg-white px-4 py-3">
                                 <span class="shop-media w-16 h-16 rounded-lg shrink-0">
                                     @if ($item->image_url)
                                         <img src="{{ $item->image_url }}" alt="{{ $item->name }}">
@@ -54,7 +54,7 @@
                         <h2 class="text-lg font-semibold text-shop-ink mb-4">Shipments</h2>
                         <div class="space-y-3">
                             @foreach ($order->fulfillments as $fulfillment)
-                                <div class="rounded-lg ring-1 ring-inset shop-hairline px-4 py-3">
+                                <div class="rounded-lg bg-white ring-1 ring-inset ring-shop-line px-4 py-3">
                                     <div class="flex items-center justify-between gap-3">
                                         <x-badge :color="$fulfillment->status_badge" dot>{{ \Illuminate\Support\Str::headline($fulfillment->status) }}</x-badge>
                                         @if ($fulfillment->shipped_at)
@@ -100,7 +100,7 @@
                         @endif
                         <div class="flex justify-between"><dt class="text-shop-muted">Shipping</dt><dd class="tabular text-shop-ink">{{ $order->shipping_formatted }}</dd></div>
                         <div class="flex justify-between"><dt class="text-shop-muted">Tax</dt><dd class="tabular text-shop-ink">{{ $order->tax_formatted }}</dd></div>
-                        <div class="pt-3 border-t shop-hairline flex justify-between text-base font-semibold">
+                        <div class="pt-3 border-t border-shop-line flex justify-between text-base font-semibold">
                             <dt class="text-shop-ink">Total</dt><dd class="tabular text-shop-ink">{{ $order->total_formatted }}</dd>
                         </div>
                         @if ($order->refunded_cents > 0)

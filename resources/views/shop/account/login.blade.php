@@ -28,7 +28,7 @@
                 {{-- IP-gated demo persona picker. Rendered only from the
                      allowlisted IP; each endpoint re-checks the IP server-side,
                      so this is a convenience, not the security boundary. --}}
-                <div class="mt-10 pt-8 border-t shop-hairline">
+                <div class="mt-10 pt-8 border-t border-shop-line">
                     <p class="text-xs font-semibold uppercase tracking-[0.16em] text-shop-muted text-center">Demo Logins</p>
                     <div class="mt-4 grid gap-2">
                         @foreach ($demoCustomers as $persona)

@@ -29,7 +29,7 @@
          x-transition:leave="transition ease-in duration-150"
          x-transition:leave-start="opacity-100 scale-100"
          x-transition:leave-end="opacity-0 scale-95"
-         class="relative flex flex-col w-full {{ $maxWidth }} max-h-[85vh] bg-white rounded-2xl shadow-2xl ring-1 ring-slate-200 overflow-hidden text-left">
+         class="relative flex flex-col w-full {{ $maxWidth }} max-h-[calc(100dvh-2rem)] bg-white rounded-2xl shadow-2xl ring-1 ring-slate-200 overflow-hidden text-left">
         {{-- Header: subtle branded gradient, icon chip, wrapping title + optional subtitle. --}}
         <div class="flex items-start gap-3.5 px-5 py-4 border-b border-slate-100 bg-gradient-to-br {{ $toneHead }} via-white to-white shrink-0">
             @if ($icon)
@@ -38,7 +38,7 @@
                 </span>
             @endif
             <div class="min-w-0 flex-1">
-                <h3 class="text-base font-semibold text-slate-900 leading-snug break-words">{{ $title }}</h3>
+                <h3 class="text-2xl font-semibold text-slate-900 leading-snug break-words">{{ $title }}</h3>
                 @if ($subtitle)<p class="mt-0.5 text-xs text-slate-500 leading-relaxed break-words">{{ $subtitle }}</p>@endif
             </div>
             <button type="button" @click="open = false" class="shrink-0 -mr-1 -mt-1 text-slate-400 hover:text-slate-600 rounded-lg p-1">

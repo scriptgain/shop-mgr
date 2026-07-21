@@ -81,14 +81,14 @@
                     </template>
 
                     <div class="flex items-stretch gap-3">
-                        {{-- overflow-hidden clips each button's hover background to the
-                             rounded corners, so it cannot bleed over the ring border. --}}
-                        <div class="inline-flex items-center overflow-hidden rounded-lg ring-1 ring-inset shop-hairline shrink-0" x-data="quantityStepper(1)">
-                            <button type="button" @click="dec()" class="w-11 h-11 flex items-center justify-center text-shop-ink hover:bg-slate-100 transition rounded-l-lg" aria-label="Decrease Quantity">
+                        {{-- Filled segmented control: no border to look dark or vanish
+                             on hover; each button gets a white chip on hover. --}}
+                        <div class="inline-flex items-center gap-0.5 rounded-lg bg-slate-100 p-1 shrink-0" x-data="quantityStepper(1)">
+                            <button type="button" @click="dec()" class="w-9 h-9 flex items-center justify-center rounded-md text-shop-muted hover:bg-white hover:text-shop-ink hover:shadow-sm transition" aria-label="Decrease Quantity">
                                 <x-icon name="minus" class="w-4 h-4" />
                             </button>
-                            <input type="number" name="quantity" min="1" x-model.number="qty" class="w-12 border-0 bg-transparent text-center text-sm focus:ring-0 tabular">
-                            <button type="button" @click="inc()" class="w-11 h-11 flex items-center justify-center text-shop-ink hover:bg-slate-100 transition rounded-r-lg" aria-label="Increase Quantity">
+                            <input type="number" name="quantity" min="1" x-model.number="qty" class="w-12 border-0 bg-transparent text-center text-sm font-medium text-shop-ink focus:ring-0 tabular">
+                            <button type="button" @click="inc()" class="w-9 h-9 flex items-center justify-center rounded-md text-shop-muted hover:bg-white hover:text-shop-ink hover:shadow-sm transition" aria-label="Increase Quantity">
                                 <x-icon name="plus" class="w-4 h-4" />
                             </button>
                         </div>
@@ -99,7 +99,7 @@
                 </form>
 
                 @if ($product->description)
-                    <div class="mt-10 pt-8 border-t shop-hairline">
+                    <div class="mt-10 pt-8 border-t border-shop-line">
                         <h2 class="text-sm font-semibold text-shop-ink mb-3">Description</h2>
                         <div class="whitespace-pre-line text-shop-muted leading-relaxed">{{ $product->description }}</div>
                     </div>
@@ -109,7 +109,7 @@
     </section>
 
     @if ($related->isNotEmpty())
-        <div class="section-divider shop-hairline"></div>
+        <div class="section-divider"></div>
 
         <section class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
             <h2 class="text-2xl font-semibold tracking-tight text-shop-ink mb-10">You May Also Like</h2>

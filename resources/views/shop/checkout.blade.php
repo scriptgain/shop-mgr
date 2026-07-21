@@ -4,7 +4,7 @@
         <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-shop-ink">Checkout</h1>
     </section>
 
-    <div class="section-divider shop-hairline"></div>
+    <div class="section-divider"></div>
 
     <section class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <form method="POST" action="{{ route('shop.checkout.place') }}"
@@ -45,7 +45,7 @@
                     @endunless
                 </div>
 
-                <div class="section-divider shop-hairline"></div>
+                <div class="section-divider"></div>
 
                 {{-- Shipping address --}}
                 <div>
@@ -93,7 +93,7 @@
                     </div>
                 </div>
 
-                <div class="section-divider shop-hairline"></div>
+                <div class="section-divider"></div>
 
                 {{-- Shipping method --}}
                 <div x-show="needsShipping" x-cloak>
@@ -101,7 +101,7 @@
 
                     <div x-show="!ratesLoaded" class="space-y-2">
                         @forelse ($quote['shipping_rates'] as $rate)
-                            <label class="flex items-center justify-between gap-4 rounded-lg ring-1 ring-inset shop-hairline px-4 py-3 cursor-pointer has-[:checked]:ring-brand-600 has-[:checked]:bg-brand-50 transition">
+                            <label class="flex items-center justify-between gap-4 rounded-lg ring-1 ring-inset ring-shop-line px-4 py-3 cursor-pointer has-[:checked]:ring-brand-600 has-[:checked]:bg-brand-50 transition">
                                 <span class="flex items-center gap-3">
                                     <input type="radio" name="_rate_display" value="{{ $rate->id }}" @checked($quote['shipping_rate']?->id === $rate->id)
                                         @change="selectedRateId = {{ $rate->id }}; quote()" class="text-brand-600 focus:ring-brand-500">
@@ -123,7 +123,7 @@
                                 <p class="text-sm text-shop-muted">No shipping options are available for this address.</p>
                             </template>
                             <template x-for="rate in rates" :key="rate.id">
-                                <label class="flex items-center justify-between gap-4 rounded-lg ring-1 ring-inset shop-hairline px-4 py-3 cursor-pointer has-[:checked]:ring-brand-600 has-[:checked]:bg-brand-50 transition">
+                                <label class="flex items-center justify-between gap-4 rounded-lg ring-1 ring-inset ring-shop-line px-4 py-3 cursor-pointer has-[:checked]:ring-brand-600 has-[:checked]:bg-brand-50 transition">
                                     <span class="flex items-center gap-3">
                                         <input type="radio" name="_rate_display" x-bind:value="rate.id" x-model.number="selectedRateId" @change="quote()" class="text-brand-600 focus:ring-brand-500">
                                         <span>
@@ -138,14 +138,14 @@
                     </template>
                 </div>
 
-                <div class="section-divider shop-hairline"></div>
+                <div class="section-divider"></div>
 
                 {{-- Payment --}}
                 <div>
                     <h2 class="text-lg font-semibold text-shop-ink mb-4">Payment</h2>
                     <div class="space-y-2">
                         @foreach ($gateways as $slug => $gateway)
-                            <label class="flex items-start gap-3 rounded-lg ring-1 ring-inset shop-hairline px-4 py-3 cursor-pointer has-[:checked]:ring-brand-600 has-[:checked]:bg-brand-50 transition">
+                            <label class="flex items-start gap-3 rounded-lg ring-1 ring-inset ring-shop-line px-4 py-3 cursor-pointer has-[:checked]:ring-brand-600 has-[:checked]:bg-brand-50 transition">
                                 <input type="radio" name="payment_gateway" value="{{ $slug }}" @checked(old('payment_gateway', array_key_first($gateways)) === $slug) required class="mt-0.5 text-brand-600 focus:ring-brand-500">
                                 <span>
                                     <span class="flex items-center gap-2 text-sm font-medium text-shop-ink">
@@ -166,7 +166,7 @@
                 </div>
 
                 @unless ($customer)
-                    <div class="section-divider shop-hairline"></div>
+                    <div class="section-divider"></div>
                     <div>
                         <h2 class="text-lg font-semibold text-shop-ink mb-2">Create An Account</h2>
                         <p class="text-sm text-shop-muted mb-4">Optional. Save Your Details For Faster Checkout Next Time.</p>
@@ -176,13 +176,13 @@
                     </div>
                 @endunless
 
-                <div class="section-divider shop-hairline"></div>
+                <div class="section-divider"></div>
 
                 {{-- Order note --}}
                 <div>
                     <x-field label="Order Notes" for="customer_note">
                         <textarea id="customer_note" name="customer_note" rows="3" placeholder="Notes About Your Order (Optional)"
-                            class="block w-full rounded-lg border-0 bg-white px-3 py-2 text-sm text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-brand-500">{{ old('customer_note') }}</textarea>
+                            class="block w-full rounded-lg border-0 bg-white px-3 py-2 text-sm text-slate-900 ring-1 ring-inset ring-slate-200 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-brand-500">{{ old('customer_note') }}</textarea>
                     </x-field>
                 </div>
 
@@ -222,7 +222,7 @@
                 <div>
                     <label class="flex items-start gap-3 cursor-pointer">
                         <input type="checkbox" name="terms" value="1" @if (config('shop.terms_required')) required @endif
-                            class="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-2 focus:ring-brand-500">
+                            class="mt-0.5 h-4 w-4 rounded border-slate-200 text-brand-600 focus:ring-2 focus:ring-brand-500">
                         <span class="text-sm text-shop-muted">
                             I Agree To The <a href="#" class="text-brand-700 hover:underline">Terms Of Service</a> And <a href="#" class="text-brand-700 hover:underline">Privacy Policy</a>.
                             @if (config('shop.terms_required'))<span class="text-rose-500">*</span>@endif
@@ -255,12 +255,12 @@
                         @endforeach
                     </ul>
 
-                    <dl class="space-y-3 text-sm border-t shop-hairline pt-4">
+                    <dl class="space-y-3 text-sm border-t border-shop-line pt-4">
                         <div class="flex justify-between"><dt class="text-shop-muted">Subtotal</dt><dd class="tabular text-shop-ink" x-text="totals.subtotal"></dd></div>
                         <div class="flex justify-between" x-show="totals.discount && totals.discount !== '$0.00'"><dt class="text-shop-muted">Discount</dt><dd class="tabular text-emerald-600" x-text="totals.discount"></dd></div>
                         <div class="flex justify-between"><dt class="text-shop-muted">Shipping</dt><dd class="tabular text-shop-ink" x-text="totals.shipping"></dd></div>
                         <div class="flex justify-between"><dt class="text-shop-muted">Tax</dt><dd class="tabular text-shop-ink" x-text="totals.tax"></dd></div>
-                        <div class="pt-3 border-t shop-hairline flex justify-between text-base font-semibold">
+                        <div class="pt-3 border-t border-shop-line flex justify-between text-base font-semibold">
                             <dt class="text-shop-ink">Total</dt><dd class="tabular text-shop-ink" x-text="totals.total"></dd>
                         </div>
                     </dl>

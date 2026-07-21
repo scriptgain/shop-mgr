@@ -7,7 +7,7 @@
 
     <section class="{{ $maxWidth }} mx-auto px-4 sm:px-6 lg:px-8">
         {{-- Account tabs (house style: tabs over a long scroll). --}}
-        <div class="flex items-center justify-between gap-4 border-b shop-hairline mb-8">
+        <div class="flex items-center justify-between gap-4 border-b border-shop-line mb-8">
             <div class="flex items-center gap-1 overflow-x-auto no-scrollbar">
                 @foreach ([['Orders', 'shop.account', 'bag'], ['Profile', 'shop.account.profile', 'user'], ['Addresses', 'shop.account.addresses', 'home']] as [$label, $routeName, $icon])
                     @php $active = request()->routeIs($routeName); @endphp
@@ -33,9 +33,12 @@
                 </x-slot:action>
             </x-empty-state>
         @else
-            <div class="divide-y shop-hairline">
+            {{-- Padded container with rounded rows: each hover ring is fully
+                 rounded and inset, so no square corners at the container edge
+                 and no doubled border against a divider. --}}
+            <div class="rounded-xl ring-1 ring-inset ring-shop-line bg-white p-1.5">
                 @foreach ($orders as $order)
-                    <a href="{{ route('shop.account.order', $order) }}" class="flex flex-wrap items-center justify-between gap-4 py-5 hover:bg-slate-50/60 transition rounded-lg px-3 -mx-3">
+                    <a href="{{ route('shop.account.order', $order) }}" class="flex flex-wrap items-center justify-between gap-4 rounded-lg px-4 py-4 transition hover:bg-slate-50 hover:ring-1 hover:ring-inset hover:ring-slate-200">
                         <div class="min-w-0">
                             <p class="font-medium text-shop-ink">{{ $order->number }}</p>
                             <p class="text-sm text-shop-muted">{{ $order->created_at->format('F j, Y') }} &middot; {{ $order->item_count }} {{ \Illuminate\Support\Str::plural('Item', $order->item_count) }}</p>
@@ -52,7 +55,7 @@
         @endif
 
         @if ($defaultAddress)
-            <div class="mt-12 pt-8 border-t shop-hairline">
+            <div class="mt-12 pt-8 border-t border-shop-line">
                 <h2 class="text-lg font-semibold text-shop-ink mb-3">Default Address</h2>
                 <p class="text-sm text-shop-muted leading-relaxed">{{ $defaultAddress->summary }}</p>
                 <a href="{{ route('shop.account.addresses') }}" class="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 hover:text-brand-800 transition">
