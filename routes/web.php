@@ -125,7 +125,6 @@ Route::name('shop.')->group(function () {
     Route::get('/pages/{page:slug}', [\App\Http\Controllers\Shop\PageController::class, 'show'])->name('page');
 
     // Public release notes (merchant-managed).
-    Route::get('/changelog', [\App\Http\Controllers\Shop\ChangelogController::class, 'index'])->name('changelog');
 
     // Cart.
     Route::get('/cart', [CartController::class, 'show'])->name('cart');
@@ -173,6 +172,13 @@ Route::name('shop.')->group(function () {
         Route::post('/account/login', [AccountController::class, 'login'])->middleware(['throttle:10,1', 'captcha:account_login']);
         Route::get('/account/register', [AccountController::class, 'showRegister'])->name('account.register');
         Route::post('/account/register', [AccountController::class, 'register'])->middleware(['throttle:10,1', 'captcha:account_register']);
+        // Password reset. Both POSTs are captcha- and throttle-guarded: the
+        // forgot form is an email-enumeration / mail-flood surface, and the reset
+        // POST is a token-guessing surface.
+        Route::get('/account/forgot', [AccountController::class, 'showForgot'])->name('account.forgot');
+        Route::post('/account/forgot', [AccountController::class, 'sendResetLink'])->middleware(['throttle:10,1', 'captcha:account_forgot']);
+        Route::get('/account/reset/{token}', [AccountController::class, 'showReset'])->name('account.reset');
+        Route::post('/account/reset', [AccountController::class, 'reset'])->name('account.reset.update')->middleware(['throttle:10,1', 'captcha:account_forgot']);
         // Customer demo personas. IP-gated inside the action and captcha-free,
         // the storefront twin of the admin dev-login.
         Route::post('/account/demo-login/{persona}', [AccountController::class, 'demoLogin'])
@@ -244,8 +250,6 @@ Route::prefix('admin')->middleware(['auth', 'security.policy'])->group(function 
     Route::resource('help-articles', \App\Http\Controllers\Admin\HelpArticleController::class)->except('show');
     Route::delete('store-pages/bulk', [\App\Http\Controllers\Admin\StorePageController::class, 'bulkDestroy'])->name('store-pages.bulk-destroy');
     Route::resource('store-pages', \App\Http\Controllers\Admin\StorePageController::class)->except('show');
-    Route::delete('changelog/bulk', [\App\Http\Controllers\Admin\ChangelogEntryController::class, 'bulkDestroy'])->name('changelog.bulk-destroy');
-    Route::resource('changelog', \App\Http\Controllers\Admin\ChangelogEntryController::class)->parameters(['changelog' => 'changelog'])->except('show');
 
     /* ---- Shipping (zones + their rates) ---- */
     Route::delete('shipping/bulk', [ShippingController::class, 'bulkDestroy'])->name('shipping.bulk-destroy');

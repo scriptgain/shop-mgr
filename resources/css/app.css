@@ -99,6 +99,26 @@
 }
 
 @layer components {
+    /* Button loading state: any form submit gets a spinner on its button so an
+       action never sits silently. Applied globally by public/js + the layout. */
+    button.is-loading, a.is-loading {
+        pointer-events: none;
+        opacity: 0.8;
+    }
+    button.is-loading::before, a.is-loading::before {
+        content: '';
+        display: inline-block;
+        width: 0.85em;
+        height: 0.85em;
+        margin-right: 0.45em;
+        vertical-align: -0.1em;
+        border: 2px solid currentColor;
+        border-right-color: transparent;
+        border-radius: 9999px;
+        animation: vx-spin 0.6s linear infinite;
+    }
+    @keyframes vx-spin { to { transform: rotate(360deg); } }
+
     /* A thin, reusable divider between page sections (house style). */
     .section-divider {
         @apply border-t border-slate-200;

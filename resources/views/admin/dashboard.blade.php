@@ -31,10 +31,26 @@
 
             {{-- Sparkline. Registered by public/js/shop-admin.js. --}}
             <div class="min-w-0 lg:col-span-3" x-data="dashboardSparkline(@js($salesSeries))" x-init="init()">
-                <svg viewBox="0 0 640 160" preserveAspectRatio="none" class="h-20 w-full sm:h-24" role="img" aria-label="Daily net revenue over the last 30 days">
-                    <polygon :points="areaPoints" class="fill-brand-500/10"></polygon>
-                    <polyline :points="linePoints" fill="none" class="stroke-brand-500" stroke-width="2" vector-effect="non-scaling-stroke"></polyline>
-                </svg>
+                {{-- relative plot so the hovered dot + value tooltip position over it --}}
+                <div class="relative" x-ref="plot" @mousemove="onMove($event)" @mouseleave="onLeave()">
+                    <svg viewBox="0 0 640 160" preserveAspectRatio="none" class="h-20 w-full sm:h-24" role="img" aria-label="Daily net revenue over the last 30 days">
+                        <polygon :points="areaPoints" class="fill-brand-500/10"></polygon>
+                        <polyline :points="linePoints" fill="none" class="stroke-brand-500" stroke-width="2" vector-effect="non-scaling-stroke"></polyline>
+                    </svg>
+
+                    {{-- Marker + value on hover --}}
+                    <template x-if="hover >= 0">
+                        <span class="pointer-events-none absolute z-10 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-600 ring-2 ring-white shadow"
+                              :style="`left:${points[hover].xPct}%;top:${points[hover].yPct}%`"></span>
+                    </template>
+                    <template x-if="hover >= 0">
+                        <div class="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs text-white shadow-lg"
+                             :style="`left:clamp(2.5rem, ${points[hover].xPct}%, calc(100% - 2.5rem));top:calc(${points[hover].yPct}% - 0.6rem)`">
+                            <span class="font-semibold" x-text="money(points[hover].cents)"></span>
+                            <span class="ml-1.5 text-slate-300" x-text="points[hover].date"></span>
+                        </div>
+                    </template>
+                </div>
                 <div class="mt-1 flex justify-between text-[11px] text-slate-400">
                     <span x-text="firstLabel"></span>
                     <span x-text="lastLabel"></span>

@@ -55,6 +55,8 @@
                 areaPoints: '',
                 firstLabel: '',
                 lastLabel: '',
+                points: [],   // {xPct, yPct, cents, date} for hover
+                hover: -1,
 
                 init: function () {
                     var pts = this.series;
@@ -68,17 +70,39 @@
                     var range = (max - min) || 1;
                     var pad = 6;
                     var stepX = pts.length > 1 ? this.width / (pts.length - 1) : 0;
+                    var self = this;
 
                     var coords = pts.map(function (p, i) {
                         var x = stepX * i;
-                        var y = this.height - pad - (((p.cents - min) / range) * (this.height - pad * 2));
+                        var y = self.height - pad - (((p.cents - min) / range) * (self.height - pad * 2));
+                        self.points.push({
+                            xPct: (x / self.width) * 100,
+                            yPct: (y / self.height) * 100,
+                            cents: p.cents,
+                            date: p.date,
+                        });
                         return x.toFixed(1) + ',' + y.toFixed(1);
-                    }, this);
+                    });
 
                     this.linePoints = coords.join(' ');
                     this.areaPoints = '0,' + this.height + ' ' + coords.join(' ') + ' ' + this.width + ',' + this.height;
                     this.firstLabel = pts[0].date;
                     this.lastLabel = pts[pts.length - 1].date;
+                },
+
+                // Nearest point to the cursor, so the whole chart width is hoverable.
+                onMove: function (event) {
+                    if (! this.points.length) { return; }
+                    var rect = this.$refs.plot.getBoundingClientRect();
+                    var rel = (event.clientX - rect.left) / rect.width;
+                    var idx = Math.round(rel * (this.points.length - 1));
+                    this.hover = Math.max(0, Math.min(this.points.length - 1, idx));
+                },
+
+                onLeave: function () { this.hover = -1; },
+
+                money: function (cents) {
+                    return '$' + (cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 },
             };
         });

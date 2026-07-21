@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use App\Notifications\CustomerPasswordReset;
 use App\Support\Money;
+use Illuminate\Auth\Passwords\CanResetPassword;
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -11,11 +14,12 @@ use Illuminate\Notifications\Notifiable;
 
 /**
  * A storefront shopper. Authenticates on the 'customer' guard, which is a
- * different session than the staff 'web' guard — a customer signing in on the
+ * different session than the staff 'web' guard: a customer signing in on the
  * shop can never end up holding an admin session.
  */
-class Customer extends Authenticatable
+class Customer extends Authenticatable implements CanResetPasswordContract
 {
+    use CanResetPassword;
     use Notifiable;
     use SoftDeletes;
 
@@ -37,6 +41,16 @@ class Customer extends Authenticatable
             'last_order_at' => 'datetime',
             'email_verified_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Deliver the reset link through our own notification so the URL points at
+     * the storefront reset route (shop.account.reset) on the customer guard,
+     * not the staff 'password.reset' route the framework default assumes.
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new CustomerPasswordReset($token));
     }
 
     public function orders(): HasMany

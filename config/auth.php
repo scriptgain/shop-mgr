@@ -114,6 +114,15 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+
+        // Storefront shoppers. Its own token table so a customer reset can never
+        // collide with a staff reset that happens to share an email address.
+        'customers' => [
+            'provider' => 'customers',
+            'table' => 'customer_password_reset_tokens',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
     ],
 
     /*

@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\CustomerAddress;
 use App\Models\Order;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -102,6 +105,71 @@ class AccountController extends Controller
         $request->session()->regenerate();
 
         return redirect()->route('shop.account')->with('status', 'Welcome. Your account is ready.');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Password reset (customer guard, dedicated 'customers' broker)
+    |--------------------------------------------------------------------------
+    */
+
+    public function showForgot()
+    {
+        return view('shop.account.forgot');
+    }
+
+    /**
+     * Issue a reset link. Always reports the same generic result so the form
+     * cannot be used to probe which emails have an account.
+     */
+    public function sendResetLink(Request $request)
+    {
+        $data = $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+
+        Password::broker('customers')->sendResetLink(['email' => $data['email']]);
+
+        return back()->with('status', 'If an account matches that email, a password reset link is on its way.');
+    }
+
+    public function showReset(Request $request, string $token)
+    {
+        return view('shop.account.reset', [
+            'token' => $token,
+            'email' => $request->query('email', ''),
+        ]);
+    }
+
+    public function reset(Request $request)
+    {
+        $data = $request->validate([
+            'token' => ['required', 'string'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $status = Password::broker('customers')->reset($data, function (Customer $customer, string $password) {
+            $customer->forceFill([
+                'password' => $password,
+                'remember_token' => Str::random(60),
+            ])->save();
+
+            event(new PasswordReset($customer));
+
+            // A password reset also confirms control of the mailbox: sign in.
+            Auth::guard('customer')->login($customer);
+        });
+
+        if ($status !== Password::PASSWORD_RESET) {
+            throw ValidationException::withMessages([
+                'email' => 'That reset link is invalid or has expired. Please request a new one.',
+            ]);
+        }
+
+        $request->session()->regenerate();
+
+        return redirect()->route('shop.account')->with('status', 'Your password has been reset.');
     }
 
     public function logout(Request $request)

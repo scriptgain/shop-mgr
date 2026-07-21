@@ -24,6 +24,7 @@ class CaptchaSettings
         'admin_login' => true,
         'account_login' => true,
         'account_register' => true,
+        'account_forgot' => true,
         'contact' => true,
         'checkout' => false,   // OFF by default: a captcha on checkout costs orders.
     ];

@@ -1,7 +1,7 @@
 <x-layouts.shop>
 
     {{-- Hero --}}
-    <section class="relative isolate overflow-hidden border-b border-shop-line bg-white">
+    <section class="relative isolate overflow-hidden bg-white">
         {{-- Soft brand wash, kept behind content so type stays crisp --}}
         <div class="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-brand-50 via-white to-white"></div>
         <div class="pointer-events-none absolute -right-24 -top-24 -z-10 h-96 w-96 rounded-full bg-brand-100/50 blur-3xl"></div>
@@ -31,27 +31,28 @@
                         </a>
                     </div>
 
-                    {{-- The three objections a first-time buyer actually has --}}
-                    <dl class="mt-10 grid max-w-lg grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-3">
+                    {{-- The three objections a first-time buyer actually has.
+                         flex-wrap wraps whole items, never the text. --}}
+                    <dl class="mt-10 flex flex-wrap gap-x-8 gap-y-4">
                         <div class="flex items-start gap-2.5">
                             <x-icon name="truck" class="mt-0.5 w-4 h-4 shrink-0 text-brand-600" />
-                            <div class="min-w-0">
-                                <dt class="text-sm font-semibold text-shop-ink">Free Shipping</dt>
-                                <dd class="text-xs text-shop-muted">On orders over $75</dd>
+                            <div>
+                                <dt class="text-sm font-semibold text-shop-ink whitespace-nowrap">Free Shipping</dt>
+                                <dd class="text-xs text-shop-muted whitespace-nowrap">On orders over $75</dd>
                             </div>
                         </div>
                         <div class="flex items-start gap-2.5">
                             <x-icon name="shield" class="mt-0.5 w-4 h-4 shrink-0 text-brand-600" />
-                            <div class="min-w-0">
-                                <dt class="text-sm font-semibold text-shop-ink">Two-Year Guarantee</dt>
-                                <dd class="text-xs text-shop-muted">On everything we sell</dd>
+                            <div>
+                                <dt class="text-sm font-semibold text-shop-ink whitespace-nowrap">Two-Year Guarantee</dt>
+                                <dd class="text-xs text-shop-muted whitespace-nowrap">On everything we sell</dd>
                             </div>
                         </div>
                         <div class="flex items-start gap-2.5">
                             <x-icon name="refresh" class="mt-0.5 w-4 h-4 shrink-0 text-brand-600" />
-                            <div class="min-w-0">
-                                <dt class="text-sm font-semibold text-shop-ink">Easy Returns</dt>
-                                <dd class="text-xs text-shop-muted">30 days, no fuss</dd>
+                            <div>
+                                <dt class="text-sm font-semibold text-shop-ink whitespace-nowrap">Easy Returns</dt>
+                                <dd class="text-xs text-shop-muted whitespace-nowrap">30 days, no fuss</dd>
                             </div>
                         </div>
                     </dl>

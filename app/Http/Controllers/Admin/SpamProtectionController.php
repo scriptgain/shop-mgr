@@ -228,6 +228,7 @@ class SpamProtectionController extends Controller
             'admin_login' => ['Admin Login', 'The staff sign-in page. A brute-force surface.', CaptchaSettings::surfaceEnabled('admin_login')],
             'account_login' => ['Customer Login', 'Storefront account sign-in. A credential-stuffing surface.', CaptchaSettings::surfaceEnabled('account_login')],
             'account_register' => ['Customer Registration', 'New storefront accounts. A fake-account surface.', CaptchaSettings::surfaceEnabled('account_register')],
+            'account_forgot' => ['Customer Password Reset', 'Forgot / reset password forms. An email-enumeration and mail-flood surface.', CaptchaSettings::surfaceEnabled('account_forgot')],
             'contact' => ['Contact / Newsletter', 'Any storefront contact or newsletter form. Fails open by default.', CaptchaSettings::surfaceEnabled('contact')],
             'checkout' => ['Guest Checkout', 'Sensitive: a challenge here can cost real orders. Off by default.', CaptchaSettings::surfaceEnabled('checkout')],
         ];
