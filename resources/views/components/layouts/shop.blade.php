@@ -264,6 +264,12 @@
                     <p class="text-sm font-semibold text-shop-ink">Help</p>
                     <ul class="mt-4 space-y-2.5 text-sm text-shop-muted">
                         <li><a href="{{ route('shop.help') }}" class="hover:text-shop-ink transition">Help Center</a></li>
+                        <li>
+                            <a href="{{ route('shop.changelog') }}" class="inline-flex items-center gap-1.5 hover:text-shop-ink transition">
+                                What's New
+                                <span class="inline-flex items-center rounded-full bg-brand-600 px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none tracking-wide text-white">Alpha</span>
+                            </a>
+                        </li>
                         <li><a href="{{ route('shop.page', 'shipping') }}" class="hover:text-shop-ink transition">Shipping Information</a></li>
                         <li><a href="{{ route('shop.page', 'refund-policy') }}" class="hover:text-shop-ink transition">Refund Policy</a></li>
                         @if (config('shop.store_email'))

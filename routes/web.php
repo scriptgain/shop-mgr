@@ -124,6 +124,9 @@ Route::name('shop.')->group(function () {
 
     Route::get('/pages/{page:slug}', [\App\Http\Controllers\Shop\PageController::class, 'show'])->name('page');
 
+    // Public release notes (merchant-managed).
+    Route::get('/changelog', [\App\Http\Controllers\Shop\ChangelogController::class, 'index'])->name('changelog');
+
     // Cart.
     Route::get('/cart', [CartController::class, 'show'])->name('cart');
     Route::post('/cart', [CartController::class, 'add'])->name('cart.add');
@@ -241,6 +244,8 @@ Route::prefix('admin')->middleware(['auth', 'security.policy'])->group(function 
     Route::resource('help-articles', \App\Http\Controllers\Admin\HelpArticleController::class)->except('show');
     Route::delete('store-pages/bulk', [\App\Http\Controllers\Admin\StorePageController::class, 'bulkDestroy'])->name('store-pages.bulk-destroy');
     Route::resource('store-pages', \App\Http\Controllers\Admin\StorePageController::class)->except('show');
+    Route::delete('changelog/bulk', [\App\Http\Controllers\Admin\ChangelogEntryController::class, 'bulkDestroy'])->name('changelog.bulk-destroy');
+    Route::resource('changelog', \App\Http\Controllers\Admin\ChangelogEntryController::class)->parameters(['changelog' => 'changelog'])->except('show');
 
     /* ---- Shipping (zones + their rates) ---- */
     Route::delete('shipping/bulk', [ShippingController::class, 'bulkDestroy'])->name('shipping.bulk-destroy');
